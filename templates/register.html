@@ -1,0 +1,23 @@
+<html>
+<head>
+</head>
+<body>
+<form action="/registerAuth" method="POST">
+	<input type="radio" id="customer" name="fav_language" value="Customer">
+	<label for="customer">Customer</label><br>
+	<input type="radio" id="airlineStaff" name="fav_language" value="Airline Staff">
+	<label for="airlineStaff">Airline Staff</label><br>
+
+	<input type="text" name = "username" placeholder="username" required/> </br>
+	<input type="password" name = "password" placeholder="password" required/></br>
+
+	<input type="submit" value = Register />
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form>
+
+<a href="/">Go back</a>
+
+</body>
+</html>
