@@ -89,7 +89,7 @@ def customerRegisterAuth():
 		conn.commit()
 		cursor.close()
 
-		return render_template('index.html')
+		return redirect(url_for('.index'))
 
 
 # --- AIRLINE STAFF LOGIN AND REGISTER ---
@@ -201,4 +201,5 @@ def searchFlights():
 
 	cursor.close()
 	
-	return render_template("search_flights.html", departure_flights = departure_flights_data, arrival_flights = arrival_flights_data)
+	# or use index.html -- either way, we will need an accessible /searchFlights page
+	return render_template("index_test.html", departure_flights = departure_flights_data, arrival_flights = arrival_flights_data)

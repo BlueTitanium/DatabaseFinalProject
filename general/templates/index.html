@@ -22,20 +22,20 @@
 	  </nav>
 	  <div class="d-flex m-3 flex-column">
 		<h3 class=>Search for flights</h3>
-		<form action="/">
+		<form action="/searchFlights" method="POST">
 			<div class="form-floating mt-2 ">
-				<input type="" class="form-control" id="sourceSearchBar" placeholder="Flight name">
+				<input type="text" name="departure_info" class="form-control" id="sourceSearchBar" placeholder="Flight name">
 				<label for="sourceSearchBar">Source City / Airport Name</label>
 			  </div>
 			  <div class="form-floating mt-2">
-				<input type="" class="form-control" id="destSearchBar" placeholder="Flight name">
+				<input type="text" name="destination_info" class="form-control" id="destSearchBar" placeholder="Flight name">
 				<label for="destSearchBar">Destination City / Airport Name</label>
 			  </div>
 			  <div class="mt-2">
-				<p> Departure Date: <input type="date" name="Departure_Date"/> </p> 
+				<p> Departure Date: <input type="date" name="departure_date"/> </p> 
 			  </div>
 			  <div class="mt-2">
-				<p> Return Date: <input type="date" name="Return_Date"/> <small>Leave return date empty for one-way trips</small> </p> 
+				<p> Return Date: <input type="date" name="return_date"/> <small>Leave return date empty for one-way trips</small> </p> 
 				
 			  </div>
 			<button type="searchFunction"class="btn btn-primary mt-2">Search</button>
