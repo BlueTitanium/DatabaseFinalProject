@@ -14,12 +14,12 @@ CREATE TABLE Airline (
 );
 
 CREATE TABLE Airplane (
-	name varchar(20),
 	id varchar(10),
+	name varchar(20),
 	num_seats int CHECK (num_seats >= 0),
 	manufacturer varchar(20),
 	age int CHECK (age >= 0),
-	PRIMARY KEY (name, id),
+	PRIMARY KEY (id, name),
 	FOREIGN KEY (name) REFERENCES Airline(name)
 		ON DELETE CASCADE
 );
@@ -69,6 +69,7 @@ CREATE TABLE Customer (
 );
 
 CREATE TABLE Flight (
+	airline_name varchar(20),
 	flight_num varchar(6),
 	departure_timestamp timestamp,
 	arrival_timestamp timestamp NULL,
@@ -76,14 +77,15 @@ CREATE TABLE Flight (
 	status varchar(8) CHECK (status IN ('delayed', 'canceled', 'on-time')),
 	departure_airport varchar(5),
 	arrival_airport varchar(5),
-	airline_name varchar(20),
 	airplane_id varchar(10),
-	PRIMARY KEY (flight_num, departure_timestamp),
+	PRIMARY KEY (airline_name, flight_num, departure_timestamp),
+	FOREIGN KEY (airline_name) REFERENCES Airline(name)
+		ON DELETE CASCADE,
 	FOREIGN KEY (departure_airport) REFERENCES Airport(name)
 		ON DELETE SET NULL,
 	FOREIGN KEY (arrival_airport) REFERENCES Airport(name)
 		ON DELETE SET NULL,
-	FOREIGN KEY (airline_name, airplane_id) REFERENCES Airplane(name, id)
+	FOREIGN KEY (airplane_id) REFERENCES Airplane(id)
 		ON DELETE SET NULL
 );
 
@@ -96,23 +98,25 @@ CREATE TABLE Ticket (
 	expiration_date date,
 	purchase_timestamp timestamp,
 	customer_email varchar(20),
+	airline_name varchar(20),
 	flight_num varchar(6) NOT NULL,
 	departure_timestamp timestamp NULL,
 	PRIMARY KEY (ticket_id),
 	FOREIGN KEY (customer_email) REFERENCES Customer(email)
 		ON DELETE CASCADE,
-	FOREIGN KEY (flight_num, departure_timestamp) REFERENCES Flight(flight_num, departure_timestamp)
+	FOREIGN KEY (airline_name, flight_num, departure_timestamp) REFERENCES Flight(airline_name, flight_num, departure_timestamp)
 );
 
 CREATE TABLE Rate (
 	email varchar(20),
+	airline_name varchar(20),
 	flight_num varchar(6),
 	departure_timestamp timestamp,
 	rating int CHECK (rating IN (1, 2, 3, 4, 5)),
 	comment varchar(255),
-	PRIMARY KEY (email, flight_num, departure_timestamp),
+	PRIMARY KEY (email, airline_name, flight_num, departure_timestamp),
 	FOREIGN KEY (email) REFERENCES Customer(email)
 		ON DELETE CASCADE,
-	FOREIGN KEY (flight_num, departure_timestamp) REFERENCES Flight(flight_num, departure_timestamp)
+	FOREIGN KEY (airline_name, flight_num, departure_timestamp) REFERENCES Flight(airline_name, flight_num, departure_timestamp)
 		ON DELETE CASCADE
 );
