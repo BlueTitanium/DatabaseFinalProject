@@ -14,7 +14,7 @@
 	<nav class="navbar navbar-expand navbar-dark bg-dark">
 		
 		<div class="container-fluid">
-			<a class="navbar-brand" href="#">Airline Reservation System</a>
+			<a class="navbar-brand" href="/">Airline Reservation System</a>
 		</div>
 			<a class="btn btn-primary m-2" href="/login">Login</a>
 
@@ -23,10 +23,38 @@
 	  <div class="d-flex m-3 flex-column">
 		<h3 class=>Search for flights</h3>
 		<form action="/">
-			<input type="text" placeholder="Search.." name="search">
-			<button type="submit">GO</button>
+			<div class="form-floating mt-2 ">
+				<input type="" class="form-control" id="sourceSearchBar" placeholder="Flight name">
+				<label for="sourceSearchBar">Source City / Airport Name</label>
+			  </div>
+			  <div class="form-floating mt-2">
+				<input type="" class="form-control" id="destSearchBar" placeholder="Flight name">
+				<label for="destSearchBar">Destination City / Airport Name</label>
+			  </div>
+			  <div class="mt-2">
+				<p> Departure Date: <input type="date" name="Departure_Date"/> </p> 
+			  </div>
+			  <div class="mt-2">
+				<p> Return Date: <input type="date" name="Return_Date"/> <small>Leave return date empty for one-way trips</small> </p> 
+				
+			  </div>
+			<button type="searchFunction"class="btn btn-primary mt-2">Search</button>
 		  </form>
+		</div>
 	  </div>
+	  <h3 class="m-3">Flights</h3>
+	  <!--TO FILL LATER-->
+	  <table class="m-3 table table-striped-columns">
+		<thead class="table-dark">
+			<tr>
+				<th> Time </th>
+				<th> Post </th>
+			</tr>
+		</thead>
+		<tbody class="table-group-divider">
+
+		</tbody>
+	  </table>
 
 <!--
 	<div class="d-flex justify-content-center align-items-center" style="height:1000px;">
