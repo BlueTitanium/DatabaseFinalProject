@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Bootstrap demo</title>
+		<!-- bootstrap css -->
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+	  </head>
+
+<body>
+{% if not message %}
+	<a href="/login">Login</a>
+	<a href="/register">Register</a>
+{% endif %}
+
+{% if message %}
+	<a href="/logout">Logout</a>
+	<a href="/remove_account">Remove Account</a>
+	<p class="message">You are logged in {{message}}. You have {{num}} follower(s)</p> </br>
+	<a href="/tweets">View your tweets</a> </br>
+	<a href="/find_people">Find people to follow</a> </br>
+	<a href="/unfollow">Unfollow someone</a> </br>
+	<a href="/view_followed">View people you have followed</a> </br>
+	</br>
+
+        <h4>15 most recent tweets from you and your followers </h4> </br>
+
+	{% for line in tweets%}
+	        <p>{{line}}</p>
+	        <hr>
+	{% endfor %}
+	{% endif %}
+	
+	<!-- bootstrap scripts -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
+</body>
+
+</html>
