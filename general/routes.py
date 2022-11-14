@@ -31,7 +31,7 @@ def customerLoginAuth():
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT * FROM customer WHERE email = %s and password = %s'
+	query = 'SELECT * FROM Customer WHERE email = %s and password = %s'
 	cursor.execute(query, (email, password))
 	#stores the results in a variable
 	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
@@ -72,7 +72,7 @@ def customerRegisterAuth():
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT email FROM customer WHERE email = %s'
+	query = 'SELECT email FROM Customer WHERE email = %s'
 	cursor.execute(query, (email))
 	#stores the results in a variable
 	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
@@ -84,7 +84,7 @@ def customerRegisterAuth():
 		return render_template('register.html', error = error)
 	else:
 		ins_data = (email, name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth)
-		ins = 'INSERT INTO customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+		ins = 'INSERT INTO Customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
 		cursor.execute(ins, ins_data)
 		conn.commit()
 		cursor.close()
@@ -103,7 +103,7 @@ def airlineStaffLoginAuth():
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT * FROM airlinestaff WHERE username = %s and password = %s'
+	query = 'SELECT * FROM AirlineStaff WHERE username = %s and password = %s'
 	cursor.execute(query, (username, password))
 	#stores the results in a variable
 	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
@@ -115,7 +115,7 @@ def airlineStaffLoginAuth():
 		#creates a session for the the user
 		#session is a built in
 		session['user'] = username
-		return redirect(url_for('airlinestaff.home'))
+		return redirect(url_for('airlinestaff_bp.home'))
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or username'
@@ -138,7 +138,7 @@ def airlineStaffRegisterAuth():
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query
-	query = 'SELECT username FROM airlinestaff WHERE username = %s'
+	query = 'SELECT username FROM AirlineStaff WHERE username = %s'
 	cursor.execute(query, (username))
 	#stores the results in a variable
 	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
@@ -150,9 +150,55 @@ def airlineStaffRegisterAuth():
 		return render_template('register.html', error = error)
 	else:
 		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
-		ins = 'INSERT INTO airlinestaff VALUES(%s, %s, %s, %s, %s, %s)'
+		ins = 'INSERT INTO AirlineStaff VALUES(%s, %s, %s, %s, %s, %s)'
 		cursor.execute(ins, ins_data)
 		conn.commit()
 		cursor.close()
 
 		return render_template('index.html')
+
+
+# --- SEARCH FUTURE FLIGHTS ---
+@general_bp.route('/searchFlights', methods=['GET', 'POST'])
+def searchFlights():
+	#grabs information from the forms
+	departure_info = request.form['departure_info']
+	destination_info = request.form['destination_info']
+
+	departure_date = request.form['departure_date']
+	return_date = request.form['return_date']
+
+	formatted_departure_info = '%' + departure_info +'%'
+	formatted_destination_info = '%' + destination_info + '%'
+
+	#cursor used to send queries
+	cursor = conn.cursor()
+
+	#executes query
+	query = "SELECT *"\
+			" FROM Flight AS F, Airport AS D, Airport AS A"\
+			" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
+				" (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s)) AND"\
+				" (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s)) AND"\
+				" DATE(F.departure_timestamp) = %s"
+	cursor.execute(query, (formatted_departure_info, formatted_departure_info, formatted_destination_info, formatted_destination_info, departure_date))
+	#stores the results in a variable
+	departure_flights_data = cursor.fetchall()
+	arrival_flights_data = []
+
+	# for round trips
+	if (return_date):
+		#executes query
+		query = "SELECT *"\
+				" FROM Flight AS F, Airport AS D, Airport AS A"\
+				" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
+					" (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s)) AND"\
+					" (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s)) AND"\
+					" DATE(F.departure_timestamp) = %s"
+		cursor.execute(query, (formatted_destination_info, formatted_destination_info, formatted_departure_airport, formatted_departure_airport, return_date))
+		#stores the results in a variable
+		arrival_flights_data = cursor.fetchall()
+
+	cursor.close()
+	
+	return render_template("search_flights.html", departure_flights = departure_flights_data, arrival_flights = arrival_flights_data)
