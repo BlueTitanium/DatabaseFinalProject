@@ -12,36 +12,34 @@
 <body>
 <!-- Navbar content -->
 	<nav class="navbar navbar-expand navbar-dark bg-dark">
-		
 		<div class="container-fluid">
 			<a class="navbar-brand" href="/">Airline Reservation System</a>
 		</div>
 			<a class="btn btn-primary m-2" href="/login">Login</a>
 
 			<a class="btn btn-primary m-2" href="/register">Register</a>
-	  </nav>
-	  <div class="d-flex m-3 flex-column">
+	</nav>
+	<div class="d-flex m-3 flex-column">
 		<h3 class=>Search for flights</h3>
 		<form action="/searchFlights" method="POST">
 			<div class="form-floating mt-2 ">
 				<input type="text" name="departure_info" class="form-control" id="sourceSearchBar" placeholder="Flight name">
 				<label for="sourceSearchBar">Source City / Airport Name</label>
-			  </div>
-			  <div class="form-floating mt-2">
+			</div>
+			<div class="form-floating mt-2">
 				<input type="text" name="destination_info" class="form-control" id="destSearchBar" placeholder="Flight name">
 				<label for="destSearchBar">Destination City / Airport Name</label>
-			  </div>
-			  <div class="mt-2">
+			</div>
+			<div class="mt-2">
 				<p> Departure Date: <input type="date" name="departure_date"/> </p> 
-			  </div>
-			  <div class="mt-2">
-				<p> Return Date: <input type="date" name="return_date"/> <small>Leave return date empty for one-way trips</small> </p> 
-				
-			  </div>
+			</div>
+			<div class="mt-2">
+				<p> Return Date: <input type="date" name="return_date"/> <small>Leave return date empty for one-way trips</small> </p> 	
+			</div>
 			<button type="searchFunction"class="btn btn-primary mt-2">Search</button>
-		  </form>
-		</div>
+		</form>
 	  </div>
+
 	  <h3 class="m-3">Flights</h3>
 	  <!--TO FILL LATER-->
 	  <table class="m-3 table table-striped-columns">
@@ -54,7 +52,7 @@
 		<tbody class="table-group-divider">
 
 		</tbody>
-	  </table>
+	</table>
 
 <!--
 	<div class="d-flex justify-content-center align-items-center" style="height:1000px;">
