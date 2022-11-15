@@ -1,6 +1,7 @@
 #Import Flask Library
 from flask import Blueprint, render_template, session, request, url_for, redirect
 from app_global import *
+from app_public_views import *
 
 general_bp = Blueprint('general_bp', __name__, template_folder='templates')
 
@@ -135,57 +136,21 @@ def airlineStaffRegisterAuth():
 
 
 # USE CASES
-# Define route for Search Future Flights use case (1a)
+#Define route for Search Future Flights use case (General 1a)
+'''
 @general_bp.route('/searchFlights', methods=['GET', 'POST'])
 def searchFlights():
-	#grabs information from the forms
-	departure_info = request.form['departure_info']
-	destination_info = request.form['destination_info']
+	# See dispatch_request(self) in app_public_views.SearchFlightView
+	pass
+'''
+general_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "index.html"), methods = ['GET', 'POST'])
 
-	departure_date = request.form['departure_date']
-	return_date = request.form['return_date']
-
-	formatted_departure_info = '%' + departure_info +'%'
-	formatted_destination_info = '%' + destination_info + '%'
-
-
-	#executes query and stores the results in a variable
-	query = "SELECT *"\
-			" FROM Flight AS F, Airport AS D, Airport AS A"\
-			" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
-				" (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s)) AND"\
-				" (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s)) AND"\
-				" DATE(F.departure_timestamp) = %s"
-	departure_flights_data = fetchall(query, (formatted_departure_info, formatted_departure_info, formatted_destination_info, formatted_destination_info, departure_date))
-	arrival_flights_data = []
-
-	# for round trips
-	if (return_date):
-		#executes query and stores the results in a variable
-		query = "SELECT *"\
-				" FROM Flight AS F, Airport AS D, Airport AS A"\
-				" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
-					" (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s)) AND"\
-					" (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s)) AND"\
-					" DATE(F.departure_timestamp) = %s"
-		arrival_flights_data = fetchall(query, (formatted_destination_info, formatted_destination_info, formatted_departure_info, formatted_departure_info, return_date))
-
-	
-	return render_template("index.html", departure_flights = departure_flights_data, arrival_flights = arrival_flights_data)
-
-
-# Define route for View Flight Status use case (1b)
+#Define route for View Flight Status use case (General 1b)
+#TODO: change index.html if necessary
+'''
 @general_bp.route('/flightStatus', methods=['GET', 'POST'])
 def flightStatus():
-	#grabs information from the form
-	airline_name = request.form['airline_name']
-	flight_num = request.form['flight_num']
-	departure_date = request.form['departure_date']
-
-	#executes query and stores the results in a variable
-	query = "SELECT status"\
-			" FROM Flight"\
-			" WHERE airline_name = %s AND flight_num = %s AND DATE(departure_timestamp) = %s"
-	data = fetchone(query, (airline_name, flight_num, departure_date))
-
-	#TODO: return
+	# See dispatch_request(self) in app_public_views.FlightStatusView
+	pass
+'''
+general_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "index.html"), methods = ['GET', 'POST'])
