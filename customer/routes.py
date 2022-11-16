@@ -85,7 +85,7 @@ def cancelTicket():
 	pass
 
 
-#Define route for give ratings
+#Define route for Give Ratings
 #TODO
 @customer_bp.route('/rate', methods=['GET', 'POST'])
 def rate():
@@ -102,6 +102,8 @@ def rate():
 	departure_timestamp =
 	'''
 
+	query = "INSERT INTO Rate VALUES(%s, %s, %s, %s, %d, %s)"
+
 	#TODO check if user is logged in
 
 	#TODO render template
@@ -116,6 +118,7 @@ def trackSpending():
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND purchase_timestamp >= DATEADD(year, -1, CURRENT_TIMESTAMP())"
 	total_spending = fetchone(query, (session['user']))
+	#NOTE if last year does not mean last 365 days, solely Last Year, have to compare YEAR(purchase_timestamp) >= YEAR(DATEADD(year, -1, CURRENT_TIMESTAMP()))
 
 	#query for spending in each month in the last 6 months
 	query = "SELECT MONTH(purchase_timestamp) AS month, SUM(sold_price) AS total_spending"\
