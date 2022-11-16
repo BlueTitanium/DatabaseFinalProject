@@ -80,7 +80,7 @@ def customerRegisterAuth():
 	if(data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
-		return render_template('register.html', error = error)
+		return render_template('registerCustomer.html', error = error)
 	else:
 		ins_data = (email, name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth)
 		ins = 'INSERT INTO Customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
@@ -134,7 +134,7 @@ def airlineStaffRegisterAuth():
 	if(data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
-		return render_template('register.html', error = error)
+		return render_template('registerAirlineStaff.html', error = error)
 	else:
 		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
 		ins = 'INSERT INTO AirlineStaff VALUES(%s, %s, %s, %s, %s, %s)'
