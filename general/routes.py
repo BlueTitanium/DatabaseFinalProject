@@ -43,9 +43,9 @@ def customerLoginAuth():
 
 	error = None
 	if(data):
-		#creates a session for the the user
+		#creates a session for the customer
 		#session is a built in
-		session['user'] = email
+		session['customer'] = email
 		return redirect(url_for('customer_bp.home'))
 	else:
 		#returns an error message to the html page

@@ -9,7 +9,7 @@ customer_bp = Blueprint('customer_bp', __name__, template_folder='templates')
 #Define route for home
 @customer_bp.route('/home')
 def home():
-	user = session['user']
+	user = session['customer']
 	return render_template('home.html', user = user)
 
 
@@ -25,7 +25,7 @@ def viewFlights():
 				" WHERE Customer.email = %s AND departure_timestamp > CURRENT_TIMESTAMP()"\
 			")"
 	
-	data = fetchall(query, (session['user']))
+	data = fetchall(query, (session['customer']))
 
 	#TODO render template or redirect
 
@@ -57,7 +57,7 @@ def purchaseTicket():
 
 	purchase_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-	customer_email = session['user']
+	customer_email = session['customer']
 
 	# TODO: set airline_name, flight_num and departure_timestamp
 	'''
@@ -93,7 +93,7 @@ def rate():
 	rating = request.form['rating']
 	comment = request.form['comment']
 
-	email = session['user']
+	email = session['customer']
 
 	#TODO get airline_name, flight_num and departure_timestamp
 	'''
@@ -117,7 +117,7 @@ def trackSpending():
 	query = "SELECT SUM(sold_price) AS total_spending"\
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND purchase_timestamp >= DATEADD(year, -1, CURRENT_TIMESTAMP())"
-	total_spending = fetchone(query, (session['user']))
+	total_spending = fetchone(query, (session['customer']))
 	#NOTE if last year does not mean last 365 days, solely Last Year, have to compare YEAR(purchase_timestamp) >= YEAR(DATEADD(year, -1, CURRENT_TIMESTAMP()))
 
 	#query for spending in each month in the last 6 months
@@ -125,7 +125,7 @@ def trackSpending():
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND purchase_timestamp >= DATEADD(month, -6, CURRENT_TIMESTAMP())"\
 			" GROUP BY MONTH(purchase_timestamp)"
-	chart_data = fetchall(query, (session['user']))
+	chart_data = fetchall(query, (session['customer']))
 
 	return render_template("track_spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
 
@@ -142,7 +142,7 @@ def trackSpendingReq():
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND"\
 			" DATE(purchase_timestamp) BETWEEN %s AND %s"
-	total_spending = fetchone(query, (session['user']))
+	total_spending = fetchone(query, (session['customer']))
 
 	#query for spending in each month in time range given
 	query = "SELECT MONTH(purchase_timestamp) AS month, SUM(sold_price) AS total_spending"\
@@ -150,7 +150,7 @@ def trackSpendingReq():
 			" WHERE customer_email = %s AND"\
 			" DATE(purchase_timestamp) BETWEEN %s AND %s"\
 			" GROUP BY MONTH(purchase_timestamp)"
-	chart_data = fetchall(query, (session['user']))
+	chart_data = fetchall(query, (session['customer']))
 
 	return render_template("track_spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
 
@@ -158,5 +158,5 @@ def trackSpendingReq():
 #Define route for logout
 @customer_bp.route('/logout')
 def logout():
-	session.pop('user')
+	session.pop('customer')
 	return redirect('/')
