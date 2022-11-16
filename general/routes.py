@@ -20,6 +20,14 @@ def login():
 def register():
 	return render_template('register.html')
 
+@general_bp.route('/registerCustomer')
+def register():
+	return render_template('registerCustomer.html')
+
+@general_bp.route('/registerAirlineStaff')
+def register():
+	return render_template('registerAirlineStaff.html')
+
 
 # --- CUSTOMER LOGIN AND REGISTER ---
 #Define route for customer login
