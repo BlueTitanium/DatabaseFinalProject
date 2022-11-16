@@ -40,7 +40,7 @@ def fetchall(query, params):
 	
 	return data
 
-def insert(query, params):
+def modify(query, params):
 	#cursor used to send queries
 	cursor = conn.cursor()
 	#executes query

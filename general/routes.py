@@ -84,7 +84,7 @@ def customerRegisterAuth():
 	else:
 		ins_data = (email, name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth)
 		ins = 'INSERT INTO Customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-		insert(ins, ins_data)
+		modify(ins, ins_data)
 
 		return redirect(url_for('.index'))
 
@@ -138,7 +138,7 @@ def airlineStaffRegisterAuth():
 	else:
 		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
 		ins = 'INSERT INTO AirlineStaff VALUES(%s, %s, %s, %s, %s, %s)'
-		insert(ins, ins_data)
+		modify(ins, ins_data)
 
 		return render_template('index.html')
 
