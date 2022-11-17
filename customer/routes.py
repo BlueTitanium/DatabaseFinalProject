@@ -14,9 +14,10 @@ def home():
 
 
 #Define route for View Future Flights use case (Customer 1)
+# Default - show future flights only
 @customer_bp.route('/viewFlights')
 def viewFlights():
-	#XXX may have to get Ticket information such as ID as well
+	#XXX may have to get Ticket information such as ID as well -- need to change query in this case
 	query = "SELECT *"\
 			" FROM Flight"\
 			" WHERE (airline_name, flight_num, departure_timestamp) IN ("\
@@ -27,28 +28,137 @@ def viewFlights():
 	
 	data = fetchall(query, (session['customer']))
 
-	#TODO render template or redirect
+	return render_template("view.html", flights = data)
+
+#Define route for View Future Flights use case (Customer 1)
+# Show all flights
+@ customer_bp.route('/viewAllFlights')
+def viewAllFlights():
+	#XXX may have to get Ticket information such as ID as well -- need to change query in this case
+	query = "SELECT *"\
+			" FROM Flight"\
+			" WHERE (airline_name, flight_num, departure_timestamp) IN ("\
+				" SELECT airline_name, flight_num, departure_timestamp"\
+				" FROM Customer JOIN Ticket ON (Customer.email = Ticket.customer_email)"\
+				" WHERE Customer.email = %s"\
+			")"
+
+	data = fetchall(query, (session['customer']))
+	return render_template("view.html", flights = data)
 
 
 #Define route for Search Future Flights use case (Customer 2, Public Info)
-'''
-@customer_bp.route('/searchFlights', methods = ['GET', 'POST'])
+@customer_bp.route('/searchFlights')
 def searchFlights():
+	return render_template("search.html")
+# Define route for Search Future Flights requests
+'''
+@customer_bp.route('/searchFlightsReq', methods = ['GET', 'POST'])
+def searchFlightsReq():
 	# See dispatch_request(self) in app_public_views.SearchFlightView
 	pass
 '''
-customer_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "home.html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/searchFlightsReq", view_func = SearchFlightsView.as_view("searchFlightsReq", "search.html"), methods = ['GET', 'POST'])
 
 
 #Define route for View Flight Status use case (Public Info)
-#TODO: change index.html if necessary
-customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "index.html"), methods = ['GET', 'POST'])
+#TODO: add route to reach page
+# Define route for View Flight Status Requests
+#TODO: change .html
+customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", ".html"), methods = ['GET', 'POST'])
 
 
-#XXX: may need to define a new route just to create a form
-#Define route for purchase ticket
-@customer_bp.route('/purchaseTicket', methods=['GET', 'POST'])
-def purchaseTicket():
+#Define route for form to purchase ticket
+@customer_bp.route('/purchaseTicket')
+def purchaseTicket(airline_name, flight_num, departure_timestamp):
+	query = "SELECT * FROM Flight WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	data = fetchone(query, (airline_name, flight_num, departure_timestamp))
+
+	query = "SELECT COUNT(ticket_id)"\
+			" FROM Ticket"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	curr_num_tickets = fetchone(query, (airline_name, flight_num, departure_timestamp))
+
+	query = "SELECT num_seats"\
+			" FROM Airplane JOIN Flight ON (Airplane.id = Flight.airplane_id AND Airplane.name = Flight.airline_name)"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	num_seats = fetchone(query, (airline_name, flight_num, departure_timestamp))
+
+	error = None
+	# check if flight exists
+	if not data:
+		error = "Flight does not exist"
+
+	# check if flight has already departed
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") >= datetime.now()):
+		error = "Flight has already departed"
+
+	# check if flight is cancelled
+	#TODO check if this works
+	elif data['status'] == 'canceled':
+		error = "Flight is canceled"
+ 
+	# check if there are still seats
+	#TODO check if this works (check if curr_num_tickets and num_seats are of type int)
+	elif not (curr_num_tickets < num_seats):
+		error = "Flight is full"
+
+	if error:
+		return render_template("purchase.html", error = error)
+
+	# calculate sold_price
+	sold_price = data['base_price']
+	if (0.6*num_seats <= curr_num_tickets):
+		sold_price *= 1.25
+
+	return render_template("purchase.html", flight = data, sold_price = sold_price)
+
+#Define route for Purchase Ticket Request
+@customer_bp.route('/purchaseTicketReq', methods=['GET', 'POST'])
+def purchaseTicketReq(airline_name, flight_num, departure_timestamp):	
+	customer_email = session['customer']
+	
+	#check if user is logged in
+	if not customer_email:
+		error = "Cannot proceed with action. User not logged in."
+		return render_template('purchase.html', error = error)
+
+
+	query = "SELECT * FROM Flight WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	data = fetchone(query, (airline_name, flight_num, departure_timestamp))
+
+	query = "SELECT COUNT(ticket_id)"\
+			" FROM Ticket"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	curr_num_tickets = fetchone(query, (airline_name, flight_num, departure_timestamp))
+
+	query = "SELECT num_seats"\
+			" FROM Airplane JOIN Flight ON (Airplane.id = Flight.airplane_id AND Airplane.name = Flight.airline_name)"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	num_seats = fetchone(query, (airline_name, flight_num, departure_timestamp))
+
+	error = None
+	# check if flight exists
+	if not data:
+		error = "Flight does not exist"
+
+	# check if flight has already departed
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") >= datetime.now()):
+		error = "Flight has already departed"
+
+	# check if flight is cancelled
+	#TODO check if this works
+	elif data['status'] == 'canceled':
+		error = "Flight is canceled"
+ 
+	# check if there are still seats
+	#TODO check if this works (check if curr_num_tickets and num_seats are of type int)
+	elif not (curr_num_tickets < num_seats):
+		error = "Flight is full"
+
+	if error:
+		return render_template("purchase.html", error = error)
+
 	#grabs information from the forms
 	card_type = request.form['card_type']
 	name_on_card = request.form['name_on_card']
@@ -57,56 +167,57 @@ def purchaseTicket():
 
 	purchase_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-	customer_email = session['customer']
+	# calculate sold_price
+	sold_price = data['base_price']
+	if (0.6*num_seats <= curr_num_tickets):
+		sold_price *= 1.25
 
-	# TODO: set airline_name, flight_num and departure_timestamp
-	'''
-	airline_name = 
-	flight_num =
-	departure_timestamp = 
-	'''
-	
-	#check if user is logged in
-	if not customer_email:
-		error = "Cannot proceed with action. User not logged in."
-		#TODO change html
-		return render_template('.html', error = error)
+	#TODO generate ticket id...somehow...
 
 	#TODO insert ticket
-	query = "INSERT INTO Ticket VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	query = "INSERT INTO Ticket VALUES(%s, %.2f, %s, %s, %s, %s, %s, %s, %s, %s)"
 	#TODO render template or redirect
 
 
-#Define route for cancel ticket
+#Define route for cancel ticket request
 #TODO
 @customer_bp.route('/cancelTicket', methods=['GET', 'POST'])
-def cancelTicket():
+def cancelTicket(ticket_id):
+	#check if user is authorized
+	customer_email = session['user']
+	query = "SELECT * FROM Ticket WHERE customer_email = %s AND ticket_id = %s"
+	data = fetchone(query, (customer_email, ticket_id))
+
+	if not data:
+		error = "You are not authorized to cancel this ticket"
+		return render_template("cancel.html", error = error)
+
 	query = "DELETE FROM Ticket WHERE ticket_id = %s"
+	modify(query, (ticket_id))
+
+	#TODO render some page (confirmation page or user home screen on success)
 	pass
 
 
 #Define route for Give Ratings
 #TODO
 @customer_bp.route('/rate', methods=['GET', 'POST'])
-def rate():
+def rate(airline_name, flight_num, departure_timestamp):
 	#grabs information from the form
 	rating = request.form['rating']
 	comment = request.form['comment']
 
 	email = session['customer']
-
-	#TODO get airline_name, flight_num and departure_timestamp
-	'''
-	airline_name =
-	flight_num = 
-	departure_timestamp =
-	'''
+	#TODO check if user is logged in
+	if not email:
+		error = "You need to be logged in to rate a flight"
+		return render_template("rate.html", error = error)
 
 	query = "INSERT INTO Rate VALUES(%s, %s, %s, %s, %d, %s)"
-
-	#TODO check if user is logged in
+	modify(query, (email, airline_name, flight_num, departure_timestamp, rating, comment))
 
 	#TODO render template
+	pass
 
 
 #Define route for Track Spending
@@ -127,7 +238,7 @@ def trackSpending():
 			" GROUP BY MONTH(purchase_timestamp)"
 	chart_data = fetchall(query, (session['customer']))
 
-	return render_template("track_spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
+	return render_template("spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
 
 #Define route for Track Spending Requests (given date)
 #TODO
@@ -152,7 +263,7 @@ def trackSpendingReq():
 			" GROUP BY MONTH(purchase_timestamp)"
 	chart_data = fetchall(query, (session['customer']))
 
-	return render_template("track_spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
+	return render_template("spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
 
 
 #Define route for logout

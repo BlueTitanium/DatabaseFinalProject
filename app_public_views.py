@@ -19,6 +19,7 @@ class SearchFlightsView(View):
 
 
         #executes query and stores the results in a variable
+        #TODO may have to check if query flight has enough seats and if it is not canceled
         query = "SELECT *"\
                 " FROM Flight AS F, Airport AS D, Airport AS A"\
                 " WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
@@ -31,12 +32,6 @@ class SearchFlightsView(View):
         # for round trips
         if (return_date):
             #executes query and stores the results in a variable
-            query = "SELECT *"\
-                    " FROM Flight AS F, Airport AS D, Airport AS A"\
-                    " WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
-                        " (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s)) AND"\
-                        " (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s)) AND"\
-                        " DATE(F.departure_timestamp) = %s"
             arrival_flights_data = fetchall(query, (formatted_destination_info, formatted_destination_info, formatted_departure_info, formatted_departure_info, return_date))
 
         
