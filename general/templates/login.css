@@ -1,0 +1,46 @@
+#container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+header {
+	font-family: Arial, serif;
+	font-size: 2em;
+	margin-top: 0.2em;
+    margin-left: 0.5em;
+    padding: 0.1em;
+	background-color: #FFFFFF;
+	text-align: left;
+}
+
+section {
+    padding-left: 0.5em;
+    text-align: left;
+}
+
+label {
+    padding-left: 0.5em;
+    display: inline-block;
+    width:100px;
+    padding-bottom: 0.5em;
+}
+
+form {
+    margin-top: 0.2em;
+    padding: 0.3em;
+}
+
+.inputButton {
+    display: inline-block;
+}
+
+#buttonHolder {
+    display: inline-block;
+    padding: 0.5em;
+    
+}
+
+.logincontainer {
+    margin-top: 1em;
+}
