@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 #Register Blueprints
 app.register_blueprint(general_bp)
-app.register_blueprint(customer_bp)
+app.register_blueprint(customer_bp, url_prefix='/customer')
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000

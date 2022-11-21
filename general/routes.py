@@ -1,6 +1,7 @@
 #Import Flask Library
 from flask import Blueprint, render_template, session, request, url_for, redirect
 from app_global import *
+from app_public_views import *
 
 general_bp = Blueprint('general_bp', __name__, template_folder='templates')
 
@@ -19,6 +20,14 @@ def login():
 def register():
 	return render_template('register.html')
 
+@general_bp.route('/registerCustomer')
+def registerCustomer():
+	return render_template('registerCustomer.html')
+
+@general_bp.route('/registerAirlineStaff')
+def registerAirlineStaff():
+	return render_template('registerAirlineStaff.html')
+
 
 # --- CUSTOMER LOGIN AND REGISTER ---
 #Define route for customer login
@@ -28,21 +37,15 @@ def customerLoginAuth():
 	email = request.form['email']
 	password = md5(request.form['password'])
 
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
+	#executes query and stores result in a variable
 	query = 'SELECT * FROM Customer WHERE email = %s and password = %s'
-	cursor.execute(query, (email, password))
-	#stores the results in a variable
-	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
-
-	cursor.close()
+	data = fetchone(query, (email, password))
 
 	error = None
 	if(data):
-		#creates a session for the the user
+		#creates a session for the customer
 		#session is a built in
-		session['user'] = email
+		session['customer'] = email
 		return redirect(url_for('customer_bp.home'))
 	else:
 		#returns an error message to the html page
@@ -69,25 +72,19 @@ def customerRegisterAuth():
 
 	date_of_birth = request.form['date_of_birth']
 
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
+	#executes query and stores result in a variable
 	query = 'SELECT email FROM Customer WHERE email = %s'
-	cursor.execute(query, (email))
-	#stores the results in a variable
-	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
+	data = fetchone(query, (email))
 
 	error = None
 	if(data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
-		return render_template('register.html', error = error)
+		return render_template('registerCustomer.html', error = error)
 	else:
 		ins_data = (email, name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth)
 		ins = 'INSERT INTO Customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-		cursor.execute(ins, ins_data)
-		conn.commit()
-		cursor.close()
+		modify(ins, ins_data)
 
 		return redirect(url_for('.index'))
 
@@ -100,15 +97,9 @@ def airlineStaffLoginAuth():
 	username = request.form['username']
 	password = md5(request.form['password'])
 
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
+	#executes query and stores the results in a variable
 	query = 'SELECT * FROM AirlineStaff WHERE username = %s and password = %s'
-	cursor.execute(query, (username, password))
-	#stores the results in a variable
-	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
-
-	cursor.close()
+	data = fetchone(query, (username, password))
 
 	error = None
 	if(data):
@@ -135,71 +126,39 @@ def airlineStaffRegisterAuth():
 
 	airline_name = request.form['airline_name']
 
-	#cursor used to send queries
-	cursor = conn.cursor()
-	#executes query
+	#executes query and stores the results in a variable
 	query = 'SELECT username FROM AirlineStaff WHERE username = %s'
-	cursor.execute(query, (username))
-	#stores the results in a variable
-	data = cursor.fetchone() #use fetchall() if you are expecting more than 1 data row
+	data = fetchone(query, (username))
 
 	error = None
 	if(data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
-		return render_template('register.html', error = error)
+		return render_template('registerAirlineStaff.html', error = error)
 	else:
 		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
 		ins = 'INSERT INTO AirlineStaff VALUES(%s, %s, %s, %s, %s, %s)'
-		cursor.execute(ins, ins_data)
-		conn.commit()
-		cursor.close()
+		modify(ins, ins_data)
 
 		return render_template('index.html')
 
 
-# --- SEARCH FUTURE FLIGHTS ---
+# USE CASES
+#Define route for Search Future Flights use case (General 1a)
+'''
 @general_bp.route('/searchFlights', methods=['GET', 'POST'])
 def searchFlights():
-	#grabs information from the forms
-	departure_info = request.form['departure_info']
-	destination_info = request.form['destination_info']
+	# See dispatch_request(self) in app_public_views.SearchFlightView
+	pass
+'''
+general_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "index.html"), methods = ['GET', 'POST'])
 
-	departure_date = request.form['departure_date']
-	return_date = request.form['return_date']
-
-	formatted_departure_info = '%' + departure_info +'%'
-	formatted_destination_info = '%' + destination_info + '%'
-
-	#cursor used to send queries
-	cursor = conn.cursor()
-
-	#executes query
-	query = "SELECT *"\
-			" FROM Flight AS F, Airport AS D, Airport AS A"\
-			" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
-				" (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s)) AND"\
-				" (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s)) AND"\
-				" DATE(F.departure_timestamp) = %s"
-	cursor.execute(query, (formatted_departure_info, formatted_departure_info, formatted_destination_info, formatted_destination_info, departure_date))
-	#stores the results in a variable
-	departure_flights_data = cursor.fetchall()
-	arrival_flights_data = []
-
-	# for round trips
-	if (return_date):
-		#executes query
-		query = "SELECT *"\
-				" FROM Flight AS F, Airport AS D, Airport AS A"\
-				" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name AND"\
-					" (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s)) AND"\
-					" (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s)) AND"\
-					" DATE(F.departure_timestamp) = %s"
-		cursor.execute(query, (formatted_destination_info, formatted_destination_info, formatted_departure_airport, formatted_departure_airport, return_date))
-		#stores the results in a variable
-		arrival_flights_data = cursor.fetchall()
-
-	cursor.close()
-	
-	# or use index.html -- either way, we will need an accessible /searchFlights page
-	return render_template("index_test.html", departure_flights = departure_flights_data, arrival_flights = arrival_flights_data)
+#Define route for View Flight Status use case (General 1b)
+#TODO: change index.html if necessary
+'''
+@general_bp.route('/flightStatus', methods=['GET', 'POST'])
+def flightStatus():
+	# See dispatch_request(self) in app_public_views.FlightStatusView
+	pass
+'''
+general_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "index.html"), methods = ['GET', 'POST'])
