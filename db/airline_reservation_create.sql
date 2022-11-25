@@ -90,7 +90,7 @@ CREATE TABLE Flight (
 );
 
 CREATE TABLE Ticket (
-	ticket_id varchar(10),
+	ticket_id int AUTO_INCREMENT,
 	sold_price numeric(6, 2) CHECK (sold_price >= 0),
 	card_type varchar(6) CHECK (card_type IN ('Debit', 'Credit')),
 	name_on_card varchar(20),

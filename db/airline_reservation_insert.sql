@@ -18,7 +18,7 @@ INSERT INTO Airplane(name, id, num_seats, manufacturer, age) VALUE ('Jet Blue', 
 INSERT INTO Airplane(name, id, num_seats, manufacturer, age) VALUE ('Jet Blue', '9abc', 524, 'Boeing', 5);
 
 -- e. Insert At least One airline Staff working for Jet Blue.
-INSERT INTO AirlineStaff(username, password, firstname, lastname, date_of_birth, airline_name) VALUE ('XxAirlineWorkerxX', 'bestPassword!223', 'Robert', 'Robertson', 1994-04-28, 'Jet Blue');
+INSERT INTO AirlineStaff(username, password, firstname, lastname, date_of_birth, airline_name) VALUE ('XxAirlineWorkerxX', 'bestPassword!223', 'Robert', 'Robertson', '1994-04-28', 'Jet Blue');
 
 -- f. Insert several flights with on-time, and delayed statuses. 
 INSERT INTO Flight(airline_name, flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id) VALUE ('Jet Blue', 'B60001', '2004-09-20 23:34:22', '2004-09-21 23:34:22', 323.45, 'delayed', 'JFK', 'PVG', '1234');
@@ -26,6 +26,6 @@ INSERT INTO Flight(airline_name, flight_num, departure_timestamp, arrival_timest
 INSERT INTO Flight(airline_name, flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id) VALUE ('Jet Blue', 'B60003', '2022-12-22 13:30:00', '2022-12-23 12:30:00', 323.45, 'delayed', 'JFK', 'PVG', '9abc');
 
 -- g. Insert some tickets for corresponding flights and insert some purchase records (customers bought some tickets).
-INSERT INTO Ticket(ticket_id, sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUE ('12312', 323.45, 'Credit', 'Dingus Dingusson', '1234456745674567', '2023-04-23', '2022-12-10 13:31:25', 'dingus@gmail.com', 'Jet Blue', 'B60003', '2022-12-22 13:30:00'); 
-INSERT INTO Ticket(ticket_id, sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUE ('345345', 654.17, 'Debit', 'Anna Zheng', '1234456745675678', '2025-6-18', '2022-11-7 21:15:02', 'az2306@nyu.edu', 'Jet Blue', 'B60002', '2022-12-21 13:30:00');
-INSERT INTO Ticket(ticket_id, sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUE ('789789', 435.78, 'Credit', 'Taneim Miah', '456789076543', '2026-05-26', '2022-04-13 08:24:48','tsm6910@nyu.edu', 'Jet Blue', 'B60001', '2004-09-20 23:34:22');
+INSERT INTO Ticket(sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUE (323.45, 'Credit', 'Dingus Dingusson', '1234456745674567', '2023-04-23', '2022-12-10 13:31:25', 'dingus@gmail.com', 'Jet Blue', 'B60003', '2022-12-22 13:30:00'); 
+INSERT INTO Ticket(sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUE (654.17, 'Debit', 'Anna Zheng', '1234456745675678', '2025-6-18', '2022-11-7 21:15:02', 'az2306@nyu.edu', 'Jet Blue', 'B60002', '2022-12-21 13:30:00');
+INSERT INTO Ticket(sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUE (435.78, 'Credit', 'Taneim Miah', '456789076543', '2026-05-26', '2022-04-13 08:24:48','tsm6910@nyu.edu', 'Jet Blue', 'B60001', '2004-09-20 23:34:22');
