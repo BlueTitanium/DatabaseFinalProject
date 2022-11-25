@@ -15,6 +15,33 @@ def index():
 def login():
 	return render_template('login.html')
 
+@general_bp.route('/customerLogin')
+def customerLogin():
+	try:
+		#check if logged in
+		if (session['customer']):
+			return redirect(url_for('customer_bp.home'))
+		
+		#otherwise, display login page
+		return render_template('customerLogin.html')
+
+	except KeyError:
+		#otherwise, display login page
+		return render_template('customerLogin.html')
+
+@general_bp.route('/staffLogin')
+def staffLogin():
+	try:
+		#check if logged in
+		if (session['user']):
+			return redirect(url_for('airlinestaff_bp.home'))
+	
+		#otherwise, display login page
+		return render_template('staffLogin.html')
+	except KeyError:
+		#otherwise, display login page
+		return render_template('staffLogin.html')
+
 #Define route for register
 @general_bp.route('/register')
 def register():
@@ -26,7 +53,9 @@ def registerCustomer():
 
 @general_bp.route('/registerAirlineStaff')
 def registerAirlineStaff():
-	return render_template('registerAirlineStaff.html')
+	query = "SELECT name FROM Airline"
+	data = fetchall(query, ())
+	return render_template('registerAirlineStaff.html', airline_names = data)
 
 
 # --- CUSTOMER LOGIN AND REGISTER ---
@@ -50,7 +79,7 @@ def customerLoginAuth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or email'
-		return render_template('login.html', error=error)
+		return render_template('customerLogin.html', error=error)
 
 #Authenticates the customer register
 @general_bp.route('/customerRegisterAuth', methods=['GET', 'POST'])
@@ -110,7 +139,7 @@ def airlineStaffLoginAuth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or username'
-		return render_template('login.html', error=error)
+		return render_template('staffLogin.html', error=error)
 
 #Authenticates the airline staff register
 @general_bp.route('/airlineStaffRegisterAuth', methods=['GET', 'POST'])

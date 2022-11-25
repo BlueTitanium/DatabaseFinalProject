@@ -34,7 +34,12 @@
 						<small>Format: 123-456-7890</small><br>
 
 						<input type="date" name="date_of_birth" placeholder="Date Of Birth" required /><br /><small>Date of Birth</small><br>
-						<input type="text" name="airline_name" placeholder="airline name" required /> <br />
+						<label for="airline_name">Airline Name:</label>
+						<select name = "airline_name">
+							{% for data in airline_names %}
+								<option value="{{data['name']}}">{{data['name']}}</option>
+							{% endfor %}
+						</select>
 						<input type="submit" value=Register />
 						{% if error %}
 						<p class="error"><strong>Error:</strong> {{error}}</p>
