@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, session, request, url_for, redirect
 from app_global import *
 from app_public_views import *
-import datetime
+from datetime import datetime
 
 customer_bp = Blueprint('customer_bp', __name__, template_folder='templates')
 
@@ -165,7 +165,7 @@ def purchaseTicketReq(airline_name, flight_num, departure_timestamp):
 	card_number = request.form['card_number']
 	expiration_date = request.form['expiration_date']
 
-	purchase_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	purchase_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	# calculate sold_price
 	sold_price = data['base_price']
