@@ -172,10 +172,10 @@ def purchaseTicketReq(airline_name, flight_num, departure_timestamp):
 	if (0.6*num_seats <= curr_num_tickets):
 		sold_price *= 1.25
 
-	#TODO generate ticket id...somehow...
-
 	#TODO insert ticket
-	query = "INSERT INTO Ticket VALUES(%s, %.2f, %s, %s, %s, %s, %s, %s, %s, %s)"
+	query = "INSERT INTO Ticket (sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUES(%.2f, %s, %s, %s, %s, %s, %s, %s, %s)"
+	
+
 	#TODO render template or redirect
 
 

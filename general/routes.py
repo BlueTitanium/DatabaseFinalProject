@@ -154,7 +154,6 @@ def searchFlights():
 general_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "index.html"), methods = ['GET', 'POST'])
 
 #Define route for View Flight Status use case (General 1b)
-#TODO: change index.html if necessary
 '''
 @general_bp.route('/flightStatus', methods=['GET', 'POST'])
 def flightStatus():
