@@ -67,6 +67,30 @@ customer_bp.add_url_rule("/searchFlightsReq", view_func = SearchFlightsView.as_v
 #TODO: change .html
 customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", ".html"), methods = ['GET', 'POST'])
 
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/purchaseTicketPage')
+def purchaseTicketPage():
+	return render_template("purchase.html")
+
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/cancelTripPage')
+def cancelTripPage():
+	return render_template("cancel.html")
+
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/findFlightStatusPage')
+def findFlightStatusPage():
+	return render_template("status.html")
+
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/ratePreviousFlightsPage')
+def ratePreviousFlightsPage():
+	return render_template("rate.html")
+
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/spendingHistoryPage')
+def spendingHistoryPage():
+	return render_template("spending.html")
 
 #Define route for form to purchase ticket
 @customer_bp.route('/purchaseTicket')

@@ -23,7 +23,66 @@
         <h3 class="mt-3">View My Flights</h3>
     </div>
 
-    
+    <div class="d-flex m-3 flex-column">
+		<form action="./searchFlights" method="POST">
+			<div class="form-floating mt-2 ">
+				<input type="text" name="departure_info" class="form-control" id="sourceSearchBar"
+					placeholder="Flight name">
+				<label for="sourceSearchBar">Source City / Airport Name</label>
+			</div>
+			<div class="form-floating mt-2">
+				<input type="text" name="destination_info" class="form-control" id="destSearchBar"
+					placeholder="Flight name">
+				<label for="destSearchBar">Destination City / Airport Name</label>
+			</div>
+            <div class="mt-2">
+                <p>
+                    <b>Optional Date Range</b>
+                </p>
+            </div>
+			<div class="mt-2">
+				<p> Beginning Date: <input type="date" name="departure_date" /> </p>
+			</div>
+			<div class="mt-2">
+				<p> End Date: <input type="date" name="return_date" /></p>
+			</div>
+			<button type="searchFunction" class="btn btn-primary mt-2">Search</button>
+		</form>
+	</div>
+
+	<div class="container text-center">
+		<div class="row">
+		  <div class="col">
+			<h3 class="m-3">Flights</h3>
+			<!--TO FILL LATER-->
+				<table class="m-3 table table-striped-columns">
+					<thead class="table-dark">
+						<tr>
+							<th> Airline Name </th>
+							<th> Flight Number </th>
+							<th> Departure Time </th>
+							<th> Arrival Time </th>
+							<th> Price </th>
+							<th> Flight Number </th>
+							<th> Departure Airport </th>
+							<th> Arrival Airport </th>
+						</tr>
+					</thead>
+					<tbody class="table-group-divider">
+						{% for flight in departure_flights %}
+						<tr>
+							<td>{{flight['airline_name']}}</td>
+							<td>{{flight['flight_num']}}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				
+		  </div>
+		  
+		</div>
+	  </div>
+
                         
     
 

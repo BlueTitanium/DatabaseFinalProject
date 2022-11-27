@@ -20,18 +20,35 @@
 
     <div class="d-flex flex-column m-3">
         <a class="btn btn-secondary btn-lg" href="./home">Back</a>
-        
     </div>
 
     <div class="d-flex m-3 flex-column">
-		<h3 class=>Cancel Trip</h3>
-		
+		<h3 class=>Find Flight Status</h3>
+		<form action="/flightStatus" method="POST">
+			<div class="form-floating mt-2 ">
+				<input type="text" name="airline_info" class="form-control" id="airlineSearchBar"
+					placeholder="Airline Name">
+				<label for="airlineSearchBar">Airline Name</label>
+			</div>
+			<div class="form-floating mt-2">
+				<input type="text" name="flight_number" class="form-control" id="flightNumber"
+					placeholder="Flight Number">
+				<label for="flightNumber">Flight Number</label>
+			</div>
+			<div class="mt-2">
+				<p> Departure Date: <input type="date" name="status_departure_date" /> </p>
+			</div>
+			<div class="mt-2">
+				<p> Arrival Date: <input type="date" name="status_arrival_date" /> </p>
+			</div>
+			<button type="statusFunction" class="btn btn-primary mt-2">Search</button>
+		</form>
 	</div>
 
 	<div class="container text-center">
 		<div class="row">
 		  <div class="col">
-			<h3 class="m-3">Available Trips</h3>
+			<h3 class="m-3">Statuses</h3>
 			<!--TO FILL LATER-->
 				<table class="m-3 table table-striped-columns">
 					<thead class="table-dark">
@@ -41,9 +58,6 @@
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Status </th>
-                            <th> Departure Airport </th>
-							<th> Arrival Airport </th>
-                            <th> Cancel? </th> <!-- Should be a button in each row here -->
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
@@ -59,6 +73,7 @@
 		  </div>
 		</div>
 	  </div>
+    
                         
     
 

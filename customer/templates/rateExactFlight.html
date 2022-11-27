@@ -20,46 +20,33 @@
 
     <div class="d-flex flex-column m-3">
         <a class="btn btn-secondary btn-lg" href="./home">Back</a>
-        
+        <h3 class="mt-3">Rate this flight</h3>
+		<h5 class="mt-3">Airline Name: </h5> <!--Maybe display the Airline Name here-->
+		<h5 class="mt-1">Departure Date: </h5> <!--Maybe display the Departure Date here-->
+		<h5 class="mt-1">Arrival Date: </h5> <!--Maybe display the Arrival Date here-->
+		<h5 class="mt-1">Departure Airport: </h5> <!--Maybe display the Departure Airport here-->
+		<h5 class="mt-1">Arrival Airport: </h5> <!--Maybe display the Arrival Airport: here-->
+		<h5 class="mt-1">Flight Number: </h5> <!--Maybe display the flight number here-->
     </div>
+	
+	<hr>
 
     <div class="d-flex m-3 flex-column">
-		<h3 class=>Cancel Trip</h3>
-		
+		<form action="./searchFlights" method="POST">
+			<div class="form-floating mt-2 ">
+				<input type="number" name="departure_info" class="form-control" id="sourceSearchBar"
+					placeholder="Card Name">
+				<label for="sourceSearchBar">Rating</label>
+			</div>
+			<div class="form-floating mt-2">
+				<div class="form-group">
+					<label for="comment">Comment:</label>
+					<textarea class="form-control mt-2" rows="5" id="comment"></textarea>
+				  </div>
+			</div>
+			<button type="rateFunction" class="btn btn-primary mt-2">Rate</button>
+		</form>
 	</div>
-
-	<div class="container text-center">
-		<div class="row">
-		  <div class="col">
-			<h3 class="m-3">Available Trips</h3>
-			<!--TO FILL LATER-->
-				<table class="m-3 table table-striped-columns">
-					<thead class="table-dark">
-						<tr>
-							<th> Airline Name </th>
-							<th> Flight Number </th>
-							<th> Departure Time </th>
-							<th> Arrival Time </th>
-							<th> Status </th>
-                            <th> Departure Airport </th>
-							<th> Arrival Airport </th>
-                            <th> Cancel? </th> <!-- Should be a button in each row here -->
-						</tr>
-					</thead>
-					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
-						<tr>
-							<td>{{flight['airline_name']}}</td>
-							<td>{{flight['flight_num']}}</td>
-						</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-				
-		  </div>
-		</div>
-	  </div>
-                        
     
 
     <!-- bootstrap scripts -->
