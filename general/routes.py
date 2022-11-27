@@ -155,6 +155,9 @@ def airlineStaffRegisterAuth():
 
 	airline_name = request.form['airline_name']
 
+	email = request.form['email']
+	phone_number = request.form['phone_number']
+
 	#executes query and stores the results in a variable
 	query = 'SELECT username FROM AirlineStaff WHERE username = %s'
 	data = fetchone(query, (username))
@@ -163,10 +166,23 @@ def airlineStaffRegisterAuth():
 	if(data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
-		return render_template('registerAirlineStaff.html', error = error)
+
+		#And re-render all the airline names
+		query = "SELECT name FROM Airline"
+		data = fetchall(query, ())
+
+		return render_template('registerAirlineStaff.html', airline_names = data, error = error)
 	else:
-		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
 		ins = 'INSERT INTO AirlineStaff VALUES(%s, %s, %s, %s, %s, %s)'
+		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
+		modify(ins, ins_data)
+
+		ins = 'INSERT INTO AirlineStaffEmails VALUES(%s, %s)'
+		ins_data = (username, email)
+		modify(ins, ins_data)
+
+		ins = 'INSERT INTO AirlineStaffPhoneNumbers VALUES(%s, %s)'
+		ins_data = (username, phone_number)
 		modify(ins, ins_data)
 
 		return render_template('index.html')

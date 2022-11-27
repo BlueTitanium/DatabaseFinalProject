@@ -57,7 +57,6 @@
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Price </th>
-							<th> Flight Number </th>
 							<th> Departure Airport </th>
 							<th> Arrival Airport </th>
 						</tr>
@@ -67,6 +66,11 @@
 						<tr>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+							<td>{{flight['departure_timestamp']}}</td>
+							<td>{{flight['arrival_timestamp']}}</td>
+							<td>{{flight['sell_price']}}</td>
+							<td>{{flight['departure_airport']}}</td>
+							<td>{{flight['arrival_airport']}}</td>
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -84,16 +88,20 @@
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Price </th>
-							<th> Flight Number </th>
 							<th> Departure Airport </th>
 							<th> Arrival Airport </th>
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
+						{% for flight in arrival_flights %}
 						<tr>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+							<td>{{flight['departure_timestamp']}}</td>
+							<td>{{flight['arrival_timestamp']}}</td>
+							<td>{{flight['sell_price']}}</td>
+							<td>{{flight['departure_airport']}}</td>
+							<td>{{flight['arrival_airport']}}</td>
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -107,20 +115,17 @@
 		<h3 class=>Find Flight Status</h3>
 		<form action="/flightStatus" method="POST">
 			<div class="form-floating mt-2 ">
-				<input type="text" name="airline_info" class="form-control" id="airlineSearchBar"
+				<input type="text" name="airline_name" class="form-control" id="airlineSearchBar"
 					placeholder="Airline Name">
 				<label for="airlineSearchBar">Airline Name</label>
 			</div>
 			<div class="form-floating mt-2">
-				<input type="text" name="flight_number" class="form-control" id="flightNumber"
+				<input type="text" name="flight_num" class="form-control" id="flightNumber"
 					placeholder="Flight Number">
 				<label for="flightNumber">Flight Number</label>
 			</div>
 			<div class="mt-2">
-				<p> Departure Date: <input type="date" name="status_departure_date" /> </p>
-			</div>
-			<div class="mt-2">
-				<p> Arrival Date: <input type="date" name="status_arrival_date" /> </p>
+				<p> Departure Date: <input type="date" name="departure_date" /> </p>
 			</div>
 			<button type="statusFunction" class="btn btn-primary mt-2">Search</button>
 		</form>
@@ -136,18 +141,33 @@
 						<tr>
 							<th> Airline Name </th>
 							<th> Flight Number </th>
-							<th> Departure Time </th>
-							<th> Arrival Time </th>
+							<th> Departure Date </th>
 							<th> Status </th>
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
 						<tr>
-							<td>{{flight['airline_name']}}</td>
-							<td>{{flight['flight_num']}}</td>
+							<td>
+								{% if status_airline_name %}
+									{{status_airline_name}}
+								{% endif %}
+							</td>
+							<td>
+								{% if status_flight_num %}
+									{{status_flight_num}}
+								{% endif %}
+							</td>
+							<td>
+								{% if status_departure_date %}
+									{{status_departure_date}}
+								{% endif %}
+							</td>
+							<td>
+								{% if status_data %}
+									{{status_data['status']}}
+								{% endif %}
+							</td>
 						</tr>
-						{% endfor %}
 					</tbody>
 				</table>
 				
