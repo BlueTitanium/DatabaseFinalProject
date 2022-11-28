@@ -185,7 +185,7 @@ def airlineStaffRegisterAuth():
 		ins_data = (username, phone_number)
 		modify(ins, ins_data)
 
-		return render_template('index.html')
+		return redirect(url_for('.index'))
 
 
 # USE CASES

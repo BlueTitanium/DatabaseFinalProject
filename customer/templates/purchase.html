@@ -24,7 +24,7 @@
     </div>
 
     <div class="d-flex m-3 flex-column">
-		<form action="./searchFlights" method="POST">
+		<form action="./searchPurchaseTickets" method="POST">
 			<div class="form-floating mt-2 ">
 				<input type="text" name="departure_info" class="form-control" id="sourceSearchBar"
 					placeholder="Flight name">
@@ -50,7 +50,6 @@
 		<div class="row">
 		  <div class="col">
 			<h3 class="">Departures</h3>
-			<!--TO FILL LATER-->
 				<table class="table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
@@ -59,7 +58,6 @@
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Price </th>
-							<th> Flight Number </th>
 							<th> Departure Airport </th>
 							<th> Arrival Airport </th>
                             <th> Purchase? </th>
@@ -70,15 +68,24 @@
 						<tr>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+							<td>{{flight['departure_timestamp']}}</td>
+							<td>{{flight['arrival_timestamp']}}</td>
+							<td>{{flight['sell_price']}}</td>
+							<td>{{flight['departure_airport']}}</td>
+							<td>{{flight['arrival_airport']}}</td>
+							<td>
+								<a href="./purchaseTicket?airline_name={{flight['airline_name']}}&flight_num={{flight['flight_num']}}&departure_timestamp={{flight['departure_timestamp']}}">
+									Click to Purchase
+								</a>
+							</td>
 						</tr>
 						{% endfor %}
 					</tbody>
 				</table>
-				
 		  </div>
+
 		  <div class="col">
 			<h3 class="">Arrivals</h3>
-				<!--TO FILL LATER-->
 				<table class="table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
@@ -87,24 +94,33 @@
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Price </th>
-							<th> Flight Number </th>
 							<th> Departure Airport </th>
 							<th> Arrival Airport </th>
                             <th> Purchase? </th>
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
+						{% for flight in arrival_flights %}
 						<tr>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+							<td>{{flight['departure_timestamp']}}</td>
+							<td>{{flight['arrival_timestamp']}}</td>
+							<td>{{flight['sell_price']}}</td>
+							<td>{{flight['departure_airport']}}</td>
+							<td>{{flight['arrival_airport']}}</td>
 						</tr>
 						{% endfor %}
 					</tbody>
 				</table>
-		  </div>
+		  	</div>
 		</div>
-	  </div>
+	</div>
+
+
+	{% if error %}
+	<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
                         
     
 

@@ -69,10 +69,6 @@ def findFlightStatusPage():
 # Define route for View Flight Status Requests
 customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "status.html"), methods = ['GET', 'POST'])
 
-#Define route for Search Future Flights use case (Customer 2, Public Info)
-@customer_bp.route('/purchaseTicketPage')
-def purchaseTicketPage():
-	return render_template("purchase.html")
 
 #Define route for Search Future Flights use case (Customer 2, Public Info)
 @customer_bp.route('/cancelTripPage')
@@ -89,21 +85,33 @@ def ratePreviousFlightsPage():
 def spendingHistoryPage():
 	return render_template("spending.html")
 
+
+#Define route for Purchase Ticket use case (Customer 2, Public Info)
+@customer_bp.route('/purchaseTicketPage')
+def purchaseTicketPage():
+	return render_template("purchase.html")
+#Define route for showing all purchaseable tickets
+customer_bp.add_url_rule("/searchPurchaseTickets", view_func = SearchFlightsView.as_view("searchPurchaseTickets", "purchase.html"), methods = ['GET', 'POST'])
+
 #Define route for form to purchase ticket
-@customer_bp.route('/purchaseTicket')
-def purchaseTicket(airline_name, flight_num, departure_timestamp):
-	query = "SELECT * FROM Flight WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+@customer_bp.route('/purchaseTicket', methods=['GET', 'POST'])
+def purchaseTicket():
+	airline_name = request.args['airline_name']
+	flight_num = request.args['flight_num']
+	departure_timestamp = request.args['departure_timestamp']
+
+	query = "WITH FlightTicketCount AS ("\
+				" SELECT airline_name, flight_num, departure_timestamp, COUNT(ticket_id) AS ticket_count"\
+				" FROM Ticket"\
+				" GROUP BY airline_name, flight_num, departure_timestamp"\
+			")"\
+			" SELECT *, CASE"\
+				" WHEN ticket_count >= 0.6*num_seats THEN ROUND(base_price * 1.25, 2)"\
+				" ELSE base_price"\
+			" END AS sell_price"\
+			" FROM Flight AS F NATURAL JOIN FlightTicketCount JOIN Airplane ON (F.airline_name = Airplane.name AND F.airplane_id = Airplane.id)"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
 	data = fetchone(query, (airline_name, flight_num, departure_timestamp))
-
-	query = "SELECT COUNT(ticket_id)"\
-			" FROM Ticket"\
-			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
-	curr_num_tickets = fetchone(query, (airline_name, flight_num, departure_timestamp))
-
-	query = "SELECT num_seats"\
-			" FROM Airplane JOIN Flight ON (Airplane.id = Flight.airplane_id AND Airplane.name = Flight.airline_name)"\
-			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
-	num_seats = fetchone(query, (airline_name, flight_num, departure_timestamp))
 
 	error = None
 	# check if flight exists
@@ -111,32 +119,30 @@ def purchaseTicket(airline_name, flight_num, departure_timestamp):
 		error = "Flight does not exist"
 
 	# check if flight has already departed
-	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") >= datetime.now()):
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") <= datetime.now()):
 		error = "Flight has already departed"
 
 	# check if flight is cancelled
-	#TODO check if this works
 	elif data['status'] == 'canceled':
 		error = "Flight is canceled"
  
 	# check if there are still seats
-	#TODO check if this works (check if curr_num_tickets and num_seats are of type int)
-	elif not (curr_num_tickets < num_seats):
+	elif not (data['ticket_count'] < data['num_seats']):
 		error = "Flight is full"
 
 	if error:
 		return render_template("purchase.html", error = error)
 
-	# calculate sold_price
-	sold_price = data['base_price']
-	if (0.6*num_seats <= curr_num_tickets):
-		sold_price *= 1.25
-
-	return render_template("purchase.html", flight = data, sold_price = sold_price)
+	return render_template("purchaseExactTicket.html", flight_data = data)
 
 #Define route for Purchase Ticket Request
 @customer_bp.route('/purchaseTicketReq', methods=['GET', 'POST'])
-def purchaseTicketReq(airline_name, flight_num, departure_timestamp):	
+def purchaseTicketReq():
+	airline_name = request.args['airline_name']
+	flight_num = request.args['flight_num']
+	departure_timestamp = request.args['departure_timestamp']
+
+
 	customer_email = session['customer']
 	
 	#check if user is logged in
@@ -145,18 +151,18 @@ def purchaseTicketReq(airline_name, flight_num, departure_timestamp):
 		return render_template('purchase.html', error = error)
 
 
-	query = "SELECT * FROM Flight WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	query = "WITH FlightTicketCount AS ("\
+				" SELECT airline_name, flight_num, departure_timestamp, COUNT(ticket_id) AS ticket_count"\
+				" FROM Ticket"\
+				" GROUP BY airline_name, flight_num, departure_timestamp"\
+			")"\
+			" SELECT *, CASE"\
+				" WHEN ticket_count >= 0.6*num_seats THEN ROUND(base_price * 1.25, 2)"\
+				" ELSE base_price"\
+			" END AS sell_price"\
+			" FROM Flight AS F NATURAL JOIN FlightTicketCount JOIN Airplane ON (F.airline_name = Airplane.name AND F.airplane_id = Airplane.id)"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
 	data = fetchone(query, (airline_name, flight_num, departure_timestamp))
-
-	query = "SELECT COUNT(ticket_id)"\
-			" FROM Ticket"\
-			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
-	curr_num_tickets = fetchone(query, (airline_name, flight_num, departure_timestamp))
-
-	query = "SELECT num_seats"\
-			" FROM Airplane JOIN Flight ON (Airplane.id = Flight.airplane_id AND Airplane.name = Flight.airline_name)"\
-			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
-	num_seats = fetchone(query, (airline_name, flight_num, departure_timestamp))
 
 	error = None
 	# check if flight exists
@@ -164,21 +170,19 @@ def purchaseTicketReq(airline_name, flight_num, departure_timestamp):
 		error = "Flight does not exist"
 
 	# check if flight has already departed
-	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") >= datetime.now()):
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") <= datetime.now()):
 		error = "Flight has already departed"
 
 	# check if flight is cancelled
-	#TODO check if this works
 	elif data['status'] == 'canceled':
 		error = "Flight is canceled"
  
 	# check if there are still seats
-	#TODO check if this works (check if curr_num_tickets and num_seats are of type int)
-	elif not (curr_num_tickets < num_seats):
+	elif not (data['ticket_count'] < data['num_seats']):
 		error = "Flight is full"
 
 	if error:
-		return render_template("purchase.html", error = error)
+		return render_template("purchaseExactTicket.html", flight_data = data, error = error)
 
 	#grabs information from the forms
 	card_type = request.form['card_type']
@@ -186,18 +190,20 @@ def purchaseTicketReq(airline_name, flight_num, departure_timestamp):
 	card_number = request.form['card_number']
 	expiration_date = request.form['expiration_date']
 
+	# check card has not expired
+	if (datetime.strptime(expiration_date, "%Y-%m-%d") <= datetime.now()):
+		error = "Card has already expired"
+		return render_template("purchaseExactTicket.html", flight_data = data, error = error)
+
 	purchase_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-	# calculate sold_price
-	sold_price = data['base_price']
-	if (0.6*num_seats <= curr_num_tickets):
-		sold_price *= 1.25
+	#insert ticket
+	ins_query = "INSERT INTO Ticket (sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	ins_data = (data['sell_price'], card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp)
+	modify(ins_query, ins_data)
 
-	#TODO insert ticket
-	query = "INSERT INTO Ticket (sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUES(%.2f, %s, %s, %s, %s, %s, %s, %s, %s)"
-	
-
-	#TODO render template or redirect
+	#redirect to View Flights Page
+	return redirect(url_for('.viewFlights'))
 
 
 #Define route for cancel ticket request
