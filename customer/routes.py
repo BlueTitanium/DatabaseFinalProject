@@ -48,6 +48,7 @@ def viewAllFlights():
 	return render_template("view.html", flights = data)
 
 
+
 #Define route for Search Future Flights use case (Customer 2, Public Info)
 @customer_bp.route('/searchFlightsPage')
 def searchFlightsPage():
@@ -62,6 +63,7 @@ def searchFlights():
 customer_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "search.html"), methods = ['GET', 'POST'])
 
 
+
 #Define route for View Flight Status use case (Public Info)
 @customer_bp.route('/findFlightStatusPage')
 def findFlightStatusPage():
@@ -70,23 +72,8 @@ def findFlightStatusPage():
 customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "status.html"), methods = ['GET', 'POST'])
 
 
-#Define route for Search Future Flights use case (Customer 2, Public Info)
-@customer_bp.route('/cancelTripPage')
-def cancelTripPage():
-	return render_template("cancel.html")
 
-#Define route for Search Future Flights use case (Customer 2, Public Info)
-@customer_bp.route('/ratePreviousFlightsPage')
-def ratePreviousFlightsPage():
-	return render_template("rate.html")
-
-#Define route for Search Future Flights use case (Customer 2, Public Info)
-@customer_bp.route('/spendingHistoryPage')
-def spendingHistoryPage():
-	return render_template("spending.html")
-
-
-#Define route for Purchase Ticket use case (Customer 2, Public Info)
+#Define route for Purchase Ticket use case (Customer 3)
 @customer_bp.route('/purchaseTicketPage')
 def purchaseTicketPage():
 	return render_template("purchase.html")
@@ -206,12 +193,24 @@ def purchaseTicketReq():
 	return redirect(url_for('.viewFlights'))
 
 
+
+#Define route for Cancel Ticket Page (Customer 4)
+@customer_bp.route('/cancelTripPage')
+def cancelTripPage():
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s AND departure_timestamp > CURRENT_TIMESTAMP()"
+	data = fetchall(query, (session['customer']))
+
+	return render_template("cancel.html", cancellable_flights_data = data)
+	
 #Define route for cancel ticket request
-#TODO
 @customer_bp.route('/cancelTicket', methods=['GET', 'POST'])
-def cancelTicket(ticket_id):
+def cancelTicket():
+	ticket_id = request.args['ticket_id']
+
 	#check if user is authorized
-	customer_email = session['user']
+	customer_email = session['customer']
 	query = "SELECT * FROM Ticket WHERE customer_email = %s AND ticket_id = %s"
 	data = fetchone(query, (customer_email, ticket_id))
 
@@ -222,53 +221,98 @@ def cancelTicket(ticket_id):
 	query = "DELETE FROM Ticket WHERE ticket_id = %s"
 	modify(query, (ticket_id))
 
-	#TODO render some page (confirmation page or user home screen on success)
-	pass
+	#redirect to Cancel Trip Page route
+	return redirect(url_for(".cancelTripPage"))
 
 
-#Define route for Give Ratings
-#TODO
+
+#Define route for Give Ratings use case (Customer 5)
+@customer_bp.route('/ratePreviousFlightsPage')
+def ratePreviousFlightsPage():
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s AND departure_timestamp < CURRENT_TIMESTAMP()"
+	data = fetchall(query, (session['customer']))
+
+	return render_template("rate.html", previous_flights = data)
+
+#Define route for Rating Specific Flight
+@customer_bp.route('/rateFlight')
+def rateFlight():
+	airline_name = request.args['airline_name']
+	flight_num = request.args['flight_num']
+	departure_timestamp = request.args['departure_timestamp']
+
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s AND airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	data = fetchone(query, (session['customer'], airline_name, flight_num, departure_timestamp))
+
+	return render_template("rateExactFlight.html", flight_data = data)
+
+#Define route for Give Ratings Request
 @customer_bp.route('/rate', methods=['GET', 'POST'])
-def rate(airline_name, flight_num, departure_timestamp):
+def rate():
+	airline_name = request.args['airline_name']
+	flight_num = request.args['flight_num']
+	departure_timestamp = request.args['departure_timestamp']
+
 	#grabs information from the form
 	rating = request.form['rating']
 	comment = request.form['comment']
 
 	email = session['customer']
-	#TODO check if user is logged in
-	if not email:
-		error = "You need to be logged in to rate a flight"
-		return render_template("rate.html", error = error)
 
-	query = "INSERT INTO Rate VALUES(%s, %s, %s, %s, %d, %s)"
+
+	# check the flight is a previous flight
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") > datetime.now()):
+		error = "This flight is not a previous flight (has not departed)."
+		return render_template("rateExactFlight.html", flight_data = data, error = error)
+
+	# check customer has flown the flight
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s AND airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	data = fetchone(query, (email, airline_name, flight_num, departure_timestamp))
+
+	if not data:
+		error = "You have not flown this flight before."
+		return render_template("rateExactFlight.html", flight_data = data, error = error)
+
+
+	query = "INSERT INTO Rate VALUES(%s, %s, %s, %s, %s, %s)"
 	modify(query, (email, airline_name, flight_num, departure_timestamp, rating, comment))
 
-	#TODO render template
-	pass
+	#redirect to rate flights page on success
+	return redirect(url_for(".ratePreviousFlightsPage"))
 
 
-#Define route for Track Spending
-#TODO
+
+#Define route for Track Spending (Customer 6)
 @customer_bp.route('/trackSpending')
 def trackSpending():
 	#query for total spending in last year
 	query = "SELECT SUM(sold_price) AS total_spending"\
 			" FROM Ticket"\
-			" WHERE customer_email = %s AND purchase_timestamp >= DATEADD(year, -1, CURRENT_TIMESTAMP())"
-	total_spending = fetchone(query, (session['customer']))
-	#NOTE if last year does not mean last 365 days, solely Last Year, have to compare YEAR(purchase_timestamp) >= YEAR(DATEADD(year, -1, CURRENT_TIMESTAMP()))
+			" WHERE customer_email = %s AND DATE(purchase_timestamp) >= DATE((CURRENT_TIMESTAMP() - INTERVAL 1 YEAR))" # DATE(DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -1 YEAR))
+	total_spending_data = fetchone(query, (session['customer']))
+	#NOTE if last year does not mean last 365 days, solely Last Year, have to compare YEAR(purchase_timestamp) >= YEAR(DATE_ADD(CURRENT_TIMESTAMP(), INTERVAL -1 YEAR))
 
 	#query for spending in each month in the last 6 months
-	query = "SELECT MONTH(purchase_timestamp) AS month, SUM(sold_price) AS total_spending"\
+	query = "SELECT YEAR(purchase_timestamp) AS year, MONTH(purchase_timestamp) AS month, SUM(sold_price) AS total_spending"\
 			" FROM Ticket"\
-			" WHERE customer_email = %s AND purchase_timestamp >= DATEADD(month, -6, CURRENT_TIMESTAMP())"\
-			" GROUP BY MONTH(purchase_timestamp)"
+			" WHERE customer_email = %s AND"\
+				" YEAR(purchase_timestamp) >= YEAR((CURRENT_TIMESTAMP() - INTERVAL 6 MONTH)) AND"\
+				" MONTH(purchase_timestamp) >= MONTH((CURRENT_TIMESTAMP() - INTERVAL 6 MONTH))"\
+			" GROUP BY year, month" # DATE(DATE_ADD(month, -6, CURRENT_TIMESTAMP()))
 	chart_data = fetchall(query, (session['customer']))
 
-	return render_template("spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
+	# render template
+	return render_template("spending.html", 
+		total_spending_header = "in the last year", total_spending_data = total_spending_data, 
+		chart_data_header = "In the Last 6 Months (Default)", chart_data = chart_data)
 
 #Define route for Track Spending Requests (given date)
-#TODO
 @customer_bp.route('/trackSpendingReq', methods = ['GET', 'POST'])
 def trackSpendingReq():
 	#grabs information from the form
@@ -280,20 +324,30 @@ def trackSpendingReq():
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND"\
 			" DATE(purchase_timestamp) BETWEEN %s AND %s"
-	total_spending = fetchone(query, (session['customer']))
+	total_spending_data = fetchone(query, (session['customer'], start_date, end_date))
 
 	#query for spending in each month in time range given
-	query = "SELECT MONTH(purchase_timestamp) AS month, SUM(sold_price) AS total_spending"\
+	query = "SELECT YEAR(purchase_timestamp) AS year, MONTH(purchase_timestamp) AS month, SUM(sold_price) AS total_spending"\
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND"\
 			" DATE(purchase_timestamp) BETWEEN %s AND %s"\
-			" GROUP BY MONTH(purchase_timestamp)"
-	chart_data = fetchall(query, (session['customer']))
-
-	return render_template("spending.html", total_spending = total_spending, chart_data = chart_data) #NOTE change name if needed
+			" GROUP BY year, month"
+	chart_data = fetchall(query, (session['customer'], start_date, end_date))
 
 
-#Define route for logout
+	# set headers
+	total_spending_header = "from " + start_date + " to " + end_date 
+	chart_data_header = "From " + start_date + " To " + end_date 
+
+
+	# render template
+	return render_template("spending.html", 
+		total_spending_header = total_spending_header, total_spending_data = total_spending_data, 
+		chart_data_header = chart_data_header, chart_data = chart_data)
+
+
+
+#Define route for logout (Customer 7)
 @customer_bp.route('/logout')
 def logout():
 	session.pop('customer')

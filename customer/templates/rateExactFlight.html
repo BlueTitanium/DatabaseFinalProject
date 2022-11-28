@@ -19,34 +19,40 @@
     </nav>
 
     <div class="d-flex flex-column m-3">
-        <a class="btn btn-secondary btn-lg" href="./home">Back</a>
+        <a class="btn btn-secondary btn-lg" href="./ratePreviousFlightsPage">Back</a>
         <h3 class="mt-3">Rate this flight</h3>
-		<h5 class="mt-3">Airline Name: </h5> <!--Maybe display the Airline Name here-->
-		<h5 class="mt-1">Departure Date: </h5> <!--Maybe display the Departure Date here-->
-		<h5 class="mt-1">Arrival Date: </h5> <!--Maybe display the Arrival Date here-->
-		<h5 class="mt-1">Departure Airport: </h5> <!--Maybe display the Departure Airport here-->
-		<h5 class="mt-1">Arrival Airport: </h5> <!--Maybe display the Arrival Airport: here-->
-		<h5 class="mt-1">Flight Number: </h5> <!--Maybe display the flight number here-->
+		<h5 class="mt-3">Airline Name: {{flight_data['airline_name']}}</h5>
+        <h5 class="mt-1">Flight Number: {{flight_data['flight_num']}}</h5>
+		<h5 class="mt-1">Departure Date: {{flight_data['departure_timestamp']}}</h5>
+		<h5 class="mt-1">Arrival Date: {{flight_data['arrival_timestamp']}}</h5>
+		<h5 class="mt-1">Departure Airport: {{flight_data['departure_airport']}}</h5>
+		<h5 class="mt-1">Arrival Airport: {{flight_data['arrival_airport']}}</h5>
+        <h5 class="mt-1">Customer Associated Ticket ID: {{flight_data['ticket_id']}}</h5>
+        <h5 class="mt-1">Price: {{flight_data['sold_price']}}</h5>
     </div>
 	
 	<hr>
 
     <div class="d-flex m-3 flex-column">
-		<form action="./searchFlights" method="POST">
+		<form action="./rate?airline_name={{flight_data['airline_name']}}&flight_num={{flight_data['flight_num']}}&departure_timestamp={{flight_data['departure_timestamp']}}" method="POST">
 			<div class="form-floating mt-2 ">
-				<input type="number" name="departure_info" class="form-control" id="sourceSearchBar"
-					placeholder="Card Name">
-				<label for="sourceSearchBar">Rating</label>
+				<input type="number" name="rating" class="form-control" id="ratingInput"
+					placeholder="Rating" min="1" max="5" required>
+				<label for="ratingInput">Rating (between 1 and 5)</label>
 			</div>
 			<div class="form-floating mt-2">
 				<div class="form-group">
 					<label for="comment">Comment:</label>
-					<textarea class="form-control mt-2" rows="5" id="comment"></textarea>
-				  </div>
+					<textarea class="form-control mt-2" rows="5" id="comment" name="comment" required></textarea>
+                </div>
 			</div>
 			<button type="rateFunction" class="btn btn-primary mt-2">Rate</button>
 		</form>
 	</div>
+
+    {% if error %}
+	<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
     
 
     <!-- bootstrap scripts -->

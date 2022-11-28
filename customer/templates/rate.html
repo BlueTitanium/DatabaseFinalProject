@@ -31,21 +31,31 @@
 				<table class="m-3 table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
+                            <th> Ticket ID </th>
 							<th> Airline Name </th>
 							<th> Flight Number </th>
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Status </th>
+                            <th> Price </th>
                             <th> Departure Airport </th>
 							<th> Arrival Airport </th>
                             <th> Rate? </th> <!-- Should be a button in each row here -->
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
+						{% for flight in previous_flights %}
 						<tr>
+                            <td>{{flight['ticket_id']}}</td>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+                            <td>{{flight['departure_timestamp']}}</td>
+                            <td>{{flight['arrival_timestamp']}}</td>
+                            <td>{{flight['status']}}</td>
+                            <td>{{flight['sold_price']}}</td>
+                            <td>{{flight['departure_airport']}}</td>
+                            <td>{{flight['arrival_airport']}}</td>
+                            <td><a href = "./rateFlight?airline_name={{flight['airline_name']}}&flight_num={{flight['flight_num']}}&departure_timestamp={{flight['departure_timestamp']}}"> Click Here to Rate </a></td>
 						</tr>
 						{% endfor %}
 					</tbody>
