@@ -24,55 +24,38 @@
     </div>
 
     <div class="d-flex m-3 flex-column">
-		<form action="./searchFlights" method="POST">
-			<div class="form-floating mt-2 ">
-				<input type="text" name="departure_info" class="form-control" id="sourceSearchBar"
-					placeholder="Flight name">
-				<label for="sourceSearchBar">Source City / Airport Name</label>
-			</div>
-			<div class="form-floating mt-2">
-				<input type="text" name="destination_info" class="form-control" id="destSearchBar"
-					placeholder="Flight name">
-				<label for="destSearchBar">Destination City / Airport Name</label>
-			</div>
-            <div class="mt-2">
-                <p>
-                    <b>Optional Date Range</b>
-                </p>
-            </div>
-			<div class="mt-2">
-				<p> Beginning Date: <input type="date" name="departure_date" /> </p>
-			</div>
-			<div class="mt-2">
-				<p> End Date: <input type="date" name="return_date" /></p>
-			</div>
-			<button type="searchFunction" class="btn btn-primary mt-2">Search</button>
-		</form>
+		<a href = "./viewFlights" class="btn btn-primary mt-2">View Future Flights (Default)</a>
+		<a href = "./viewAllFlights" class="btn btn-primary mt-2">View All Flights (Including Previous)</a>
 	</div>
 
 	<div class="container text-center">
 		<div class="row">
 		  <div class="col">
 			<h3 class="m-3">Flights</h3>
-			<!--TO FILL LATER-->
 				<table class="m-3 table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
+							<th> Ticket ID </th>
 							<th> Airline Name </th>
 							<th> Flight Number </th>
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Price </th>
-							<th> Flight Number </th>
 							<th> Departure Airport </th>
 							<th> Arrival Airport </th>
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
+						{% for flight in flights %}
 						<tr>
+							<td>{{flight['ticket_id']}}</td>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+							<td>{{flight['departure_timestamp']}}</td>
+							<td>{{flight['arrival_timestamp']}}</td>
+							<td>{{flight['sold_price']}}</td>
+							<td>{{flight['departure_airport']}}</td>
+							<td>{{flight['arrival_airport']}}</td>
 						</tr>
 						{% endfor %}
 					</tbody>

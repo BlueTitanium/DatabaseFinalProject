@@ -59,7 +59,6 @@
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Price </th>
-							<th> Flight Number </th>
 							<th> Departure Airport </th>
 							<th> Arrival Airport </th>
 						</tr>
@@ -69,6 +68,11 @@
 						<tr>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+							<td>{{flight['departure_timestamp']}}</td>
+							<td>{{flight['arrival_timestamp']}}</td>
+							<td>{{flight['sell_price']}}</td>
+							<td>{{flight['departure_airport']}}</td>
+							<td>{{flight['arrival_airport']}}</td>
 						</tr>
 						{% endfor %}
 					</tbody>
@@ -86,16 +90,20 @@
 							<th> Departure Time </th>
 							<th> Arrival Time </th>
 							<th> Price </th>
-							<th> Flight Number </th>
 							<th> Departure Airport </th>
 							<th> Arrival Airport </th>
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
+						{% for flight in arrival_flights %}
 						<tr>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
+							<td>{{flight['departure_timestamp']}}</td>
+							<td>{{flight['arrival_timestamp']}}</td>
+							<td>{{flight['sell_price']}}</td>
+							<td>{{flight['departure_airport']}}</td>
+							<td>{{flight['arrival_airport']}}</td>
 						</tr>
 						{% endfor %}
 					</tbody>

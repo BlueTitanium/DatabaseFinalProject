@@ -17,7 +17,8 @@ def home():
 # Default - show future flights only
 @customer_bp.route('/viewFlights')
 def viewFlights():
-	#XXX may have to get Ticket information such as ID as well -- need to change query in this case
+	'''
+	# this query retrieves only flight information
 	query = "SELECT *"\
 			" FROM Flight"\
 			" WHERE (airline_name, flight_num, departure_timestamp) IN ("\
@@ -25,6 +26,11 @@ def viewFlights():
 				" FROM Customer JOIN Ticket ON (Customer.email = Ticket.customer_email)"\
 				" WHERE Customer.email = %s AND departure_timestamp > CURRENT_TIMESTAMP()"\
 			")"
+	'''
+
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s AND departure_timestamp > CURRENT_TIMESTAMP()"
 	
 	data = fetchall(query, (session['customer']))
 
@@ -32,40 +38,36 @@ def viewFlights():
 
 #Define route for View Future Flights use case (Customer 1)
 # Show all flights
-@ customer_bp.route('/viewAllFlights')
+@customer_bp.route('/viewAllFlights')
 def viewAllFlights():
-	#XXX may have to get Ticket information such as ID as well -- need to change query in this case
-	query = "SELECT *"\
-			" FROM Flight"\
-			" WHERE (airline_name, flight_num, departure_timestamp) IN ("\
-				" SELECT airline_name, flight_num, departure_timestamp"\
-				" FROM Customer JOIN Ticket ON (Customer.email = Ticket.customer_email)"\
-				" WHERE Customer.email = %s"\
-			")"
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s"
 
 	data = fetchall(query, (session['customer']))
 	return render_template("view.html", flights = data)
 
 
 #Define route for Search Future Flights use case (Customer 2, Public Info)
-@customer_bp.route('/searchFlights')
-def searchFlights():
+@customer_bp.route('/searchFlightsPage')
+def searchFlightsPage():
 	return render_template("search.html")
 # Define route for Search Future Flights requests
 '''
-@customer_bp.route('/searchFlightsReq', methods = ['GET', 'POST'])
-def searchFlightsReq():
+@customer_bp.route('/searchFlights', methods = ['GET', 'POST'])
+def searchFlights():
 	# See dispatch_request(self) in app_public_views.SearchFlightView
 	pass
 '''
-customer_bp.add_url_rule("/searchFlightsReq", view_func = SearchFlightsView.as_view("searchFlightsReq", "search.html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "search.html"), methods = ['GET', 'POST'])
 
 
 #Define route for View Flight Status use case (Public Info)
-#TODO: add route to reach page
+@customer_bp.route('/findFlightStatusPage')
+def findFlightStatusPage():
+	return render_template("status.html")
 # Define route for View Flight Status Requests
-#TODO: change .html
-customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", ".html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "status.html"), methods = ['GET', 'POST'])
 
 #Define route for Search Future Flights use case (Customer 2, Public Info)
 @customer_bp.route('/purchaseTicketPage')
@@ -76,11 +78,6 @@ def purchaseTicketPage():
 @customer_bp.route('/cancelTripPage')
 def cancelTripPage():
 	return render_template("cancel.html")
-
-#Define route for Search Future Flights use case (Customer 2, Public Info)
-@customer_bp.route('/findFlightStatusPage')
-def findFlightStatusPage():
-	return render_template("status.html")
 
 #Define route for Search Future Flights use case (Customer 2, Public Info)
 @customer_bp.route('/ratePreviousFlightsPage')
