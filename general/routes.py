@@ -15,6 +15,33 @@ def index():
 def login():
 	return render_template('login.html')
 
+@general_bp.route('/customerLogin')
+def customerLogin():
+	try:
+		#check if logged in
+		if (session['customer']):
+			return redirect(url_for('customer_bp.home'))
+		
+		#otherwise, display login page
+		return render_template('customerLogin.html')
+
+	except KeyError:
+		#otherwise, display login page
+		return render_template('customerLogin.html')
+
+@general_bp.route('/staffLogin')
+def staffLogin():
+	try:
+		#check if logged in
+		if (session['user']):
+			return redirect(url_for('airlinestaff_bp.home'))
+	
+		#otherwise, display login page
+		return render_template('staffLogin.html')
+	except KeyError:
+		#otherwise, display login page
+		return render_template('staffLogin.html')
+
 #Define route for register
 @general_bp.route('/register')
 def register():
@@ -26,7 +53,9 @@ def registerCustomer():
 
 @general_bp.route('/registerAirlineStaff')
 def registerAirlineStaff():
-	return render_template('registerAirlineStaff.html')
+	query = "SELECT name FROM Airline"
+	data = fetchall(query, ())
+	return render_template('registerAirlineStaff.html', airline_names = data)
 
 
 # --- CUSTOMER LOGIN AND REGISTER ---
@@ -50,7 +79,7 @@ def customerLoginAuth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or email'
-		return render_template('login.html', error=error)
+		return render_template('customerLogin.html', error=error)
 
 #Authenticates the customer register
 @general_bp.route('/customerRegisterAuth', methods=['GET', 'POST'])
@@ -110,7 +139,7 @@ def airlineStaffLoginAuth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or username'
-		return render_template('login.html', error=error)
+		return render_template('staffLogin.html', error=error)
 
 #Authenticates the airline staff register
 @general_bp.route('/airlineStaffRegisterAuth', methods=['GET', 'POST'])
@@ -126,6 +155,9 @@ def airlineStaffRegisterAuth():
 
 	airline_name = request.form['airline_name']
 
+	email = request.form['email']
+	phone_number = request.form['phone_number']
+
 	#executes query and stores the results in a variable
 	query = 'SELECT username FROM AirlineStaff WHERE username = %s'
 	data = fetchone(query, (username))
@@ -134,10 +166,23 @@ def airlineStaffRegisterAuth():
 	if(data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
-		return render_template('registerAirlineStaff.html', error = error)
+
+		#And re-render all the airline names
+		query = "SELECT name FROM Airline"
+		data = fetchall(query, ())
+
+		return render_template('registerAirlineStaff.html', airline_names = data, error = error)
 	else:
-		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
 		ins = 'INSERT INTO AirlineStaff VALUES(%s, %s, %s, %s, %s, %s)'
+		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
+		modify(ins, ins_data)
+
+		ins = 'INSERT INTO AirlineStaffEmails VALUES(%s, %s)'
+		ins_data = (username, email)
+		modify(ins, ins_data)
+
+		ins = 'INSERT INTO AirlineStaffPhoneNumbers VALUES(%s, %s)'
+		ins_data = (username, phone_number)
 		modify(ins, ins_data)
 
 		return render_template('index.html')
@@ -154,7 +199,6 @@ def searchFlights():
 general_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "index.html"), methods = ['GET', 'POST'])
 
 #Define route for View Flight Status use case (General 1b)
-#TODO: change index.html if necessary
 '''
 @general_bp.route('/flightStatus', methods=['GET', 'POST'])
 def flightStatus():

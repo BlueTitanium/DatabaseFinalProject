@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, session, request, url_for, redirect
 from app_global import *
 from app_public_views import *
-import datetime
+from datetime import datetime
 
 customer_bp = Blueprint('customer_bp', __name__, template_folder='templates')
 
@@ -17,7 +17,8 @@ def home():
 # Default - show future flights only
 @customer_bp.route('/viewFlights')
 def viewFlights():
-	#XXX may have to get Ticket information such as ID as well -- need to change query in this case
+	'''
+	# this query retrieves only flight information
 	query = "SELECT *"\
 			" FROM Flight"\
 			" WHERE (airline_name, flight_num, departure_timestamp) IN ("\
@@ -25,6 +26,11 @@ def viewFlights():
 				" FROM Customer JOIN Ticket ON (Customer.email = Ticket.customer_email)"\
 				" WHERE Customer.email = %s AND departure_timestamp > CURRENT_TIMESTAMP()"\
 			")"
+	'''
+
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s AND departure_timestamp > CURRENT_TIMESTAMP()"
 	
 	data = fetchall(query, (session['customer']))
 
@@ -32,41 +38,56 @@ def viewFlights():
 
 #Define route for View Future Flights use case (Customer 1)
 # Show all flights
-@ customer_bp.route('/viewAllFlights')
+@customer_bp.route('/viewAllFlights')
 def viewAllFlights():
-	#XXX may have to get Ticket information such as ID as well -- need to change query in this case
-	query = "SELECT *"\
-			" FROM Flight"\
-			" WHERE (airline_name, flight_num, departure_timestamp) IN ("\
-				" SELECT airline_name, flight_num, departure_timestamp"\
-				" FROM Customer JOIN Ticket ON (Customer.email = Ticket.customer_email)"\
-				" WHERE Customer.email = %s"\
-			")"
+	query = "SELECT Flight.*, ticket_id, sold_price"\
+			" FROM Flight NATURAL JOIN Ticket"\
+			" WHERE customer_email = %s"
 
 	data = fetchall(query, (session['customer']))
 	return render_template("view.html", flights = data)
 
 
 #Define route for Search Future Flights use case (Customer 2, Public Info)
-@customer_bp.route('/searchFlights')
-def searchFlights():
+@customer_bp.route('/searchFlightsPage')
+def searchFlightsPage():
 	return render_template("search.html")
 # Define route for Search Future Flights requests
 '''
-@customer_bp.route('/searchFlightsReq', methods = ['GET', 'POST'])
-def searchFlightsReq():
+@customer_bp.route('/searchFlights', methods = ['GET', 'POST'])
+def searchFlights():
 	# See dispatch_request(self) in app_public_views.SearchFlightView
 	pass
 '''
-customer_bp.add_url_rule("/searchFlightsReq", view_func = SearchFlightsView.as_view("searchFlightsReq", "search.html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "search.html"), methods = ['GET', 'POST'])
 
 
 #Define route for View Flight Status use case (Public Info)
-#TODO: add route to reach page
+@customer_bp.route('/findFlightStatusPage')
+def findFlightStatusPage():
+	return render_template("status.html")
 # Define route for View Flight Status Requests
-#TODO: change .html
-customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", ".html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "status.html"), methods = ['GET', 'POST'])
 
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/purchaseTicketPage')
+def purchaseTicketPage():
+	return render_template("purchase.html")
+
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/cancelTripPage')
+def cancelTripPage():
+	return render_template("cancel.html")
+
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/ratePreviousFlightsPage')
+def ratePreviousFlightsPage():
+	return render_template("rate.html")
+
+#Define route for Search Future Flights use case (Customer 2, Public Info)
+@customer_bp.route('/spendingHistoryPage')
+def spendingHistoryPage():
+	return render_template("spending.html")
 
 #Define route for form to purchase ticket
 @customer_bp.route('/purchaseTicket')
@@ -165,17 +186,17 @@ def purchaseTicketReq(airline_name, flight_num, departure_timestamp):
 	card_number = request.form['card_number']
 	expiration_date = request.form['expiration_date']
 
-	purchase_timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	purchase_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 	# calculate sold_price
 	sold_price = data['base_price']
 	if (0.6*num_seats <= curr_num_tickets):
 		sold_price *= 1.25
 
-	#TODO generate ticket id...somehow...
-
 	#TODO insert ticket
-	query = "INSERT INTO Ticket VALUES(%s, %.2f, %s, %s, %s, %s, %s, %s, %s, %s)"
+	query = "INSERT INTO Ticket (sold_price, card_type, name_on_card, card_number, expiration_date, purchase_timestamp, customer_email, airline_name, flight_num, departure_timestamp) VALUES(%.2f, %s, %s, %s, %s, %s, %s, %s, %s)"
+	
+
 	#TODO render template or redirect
 
 

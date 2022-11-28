@@ -19,12 +19,14 @@
     </nav>
 
     <div class="d-flex flex-column m-5">
-        <a class="btn btn-primary m-2 btn-lg" href="./">View My Flights</a>
-        <a class="btn btn-primary m-2 btn-lg" href="./">Search For Flights</a>
-        <a class="btn btn-primary m-2 btn-lg" href="./">Purchase Tickets</a>
-        <a class="btn btn-primary m-2 btn-lg" href="./">Cancel Trip</a>
-        <a class="btn btn-primary m-2 btn-lg" href="./">Rate Previous Flights</a>
-        <a class="btn btn-primary m-2 btn-lg" href="./">Spending History</a>
+        <h3> Welcome {% if user %} {{user}} {% endif %}</h3>
+        <a class="btn btn-primary m-2 btn-lg" href="./viewFlights">View My Flights</a>
+        <a class="btn btn-primary m-2 btn-lg" href="./searchFlightsPage">Search For Flights</a>
+        <a class="btn btn-primary m-2 btn-lg" href="./findFlightStatusPage">Find Flight Status</a>
+        <a class="btn btn-primary m-2 btn-lg" href="./purchaseTicketPage">Purchase Tickets</a>
+        <a class="btn btn-primary m-2 btn-lg" href="./cancelTripPage">Cancel Trip</a>
+        <a class="btn btn-primary m-2 btn-lg" href="./ratePreviousFlightsPage">Rate Previous Flights</a>
+        <a class="btn btn-primary m-2 btn-lg" href="./spendingHistoryPage">Spending History</a>
     </div>
     
 

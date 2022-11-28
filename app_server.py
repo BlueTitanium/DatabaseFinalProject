@@ -4,6 +4,7 @@ from flask import Flask
 #Import Blueprints
 from general.routes import general_bp
 from customer.routes import customer_bp
+from airlinestaff.routes import airlinestaff_bp
 
 #Initialize the app from Flask
 app = Flask(__name__)
@@ -11,6 +12,7 @@ app = Flask(__name__)
 #Register Blueprints
 app.register_blueprint(general_bp)
 app.register_blueprint(customer_bp, url_prefix='/customer')
+app.register_blueprint(airlinestaff_bp, url_prefix='/airlinestaff')
 
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
