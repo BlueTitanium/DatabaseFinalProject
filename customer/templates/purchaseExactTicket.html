@@ -19,47 +19,51 @@
     </nav>
 
     <div class="d-flex flex-column m-3">
-        <a class="btn btn-secondary btn-lg" href="./home">Back</a>
+        <a class="btn btn-secondary btn-lg" href="./purchaseTicketPage">Back</a>
         <h3 class="mt-3">Purchase this ticket</h3>
-		<h5 class="mt-3">Airline Name: </h5> <!--Maybe display the Airline Name here-->
-		<h5 class="mt-1">Departure Date: </h5> <!--Maybe display the Departure Date here-->
-		<h5 class="mt-1">Arrival Date: </h5> <!--Maybe display the Arrival Date here-->
-		<h5 class="mt-1">Departure Airport: </h5> <!--Maybe display the Departure Airport here-->
-		<h5 class="mt-1">Arrival Airport: </h5> <!--Maybe display the Arrival Airport: here-->
-		<h5 class="mt-1">Flight Number: </h5> <!--Maybe display the flight number here-->
-		<h5 class="mt-1">Price: </h5> <!--Maybe display the price here-->
+		<h5 class="mt-3">Airline Name: {{flight_data['airline_name']}}</h5>
+		<h5 class="mt-1">Flight Number: {{flight_data['flight_num']}}</h5>
+		<h5 class="mt-1">Departure Timestamp: {{flight_data['departure_timestamp']}}</h5>
+		<h5 class="mt-1">Arrival Timestamp: {{flight_data['arrival_timestamp']}}</h5>
+		<h5 class="mt-1">Departure Airport: {{flight_data['departure_airport']}}</h5>
+		<h5 class="mt-1">Arrival Airport: {{flight_data['arrival_airport']}}</h5>
+		<h5 class="mt-1">Price: {{flight_data['sell_price']}}</h5>
     </div>
 	
 	<hr>
 
     <div class="d-flex m-3 flex-column">
-		<form action="./searchFlights" method="POST">
+		<form action="./purchaseTicketReq?airline_name={{flight_data['airline_name']}}&flight_num={{flight_data['flight_num']}}&departure_timestamp={{flight_data['departure_timestamp']}}" method="POST">
 			
 			<div class="form-floating mt-2 ">
 				<p class="">Card Type: </p>
 				<div class="radio m-3">
-					<label><input type="radio" name="optradio" checked>&nbsp;Credit</label>
-				  </div>
-				  <div class="radio m-3">
-					<label><input type="radio" name="optradio">&nbsp;Debit</label>
-				  </div>
+					<label><input type="radio" name="card_type" value="Credit" checked>&nbsp;Credit</label>
+				</div>
+				<div class="radio m-3">
+					<label><input type="radio" name="card_type" value="Debit">&nbsp;Debit</label>
+				</div>
 			</div>
 			<div class="form-floating mt-2 ">
-				<input type="number" name="departure_info" class="form-control" id="sourceSearchBar"
-					placeholder="Card Name">
-				<label for="sourceSearchBar">Card Number</label>
+				<input type="number" name="card_number" class="form-control" id="cardnumber"
+					placeholder="Card Name" required>
+				<label for="cardnumber">Card Number</label>
 			</div>
 			<div class="form-floating mt-2">
-				<input type="text" name="destination_info" class="form-control" id="destSearchBar"
-					placeholder="Name On Card">
-				<label for="destSearchBar">Name On Card</label>
+				<input type="text" name="name_on_card" class="form-control" id="cardname"
+					placeholder="Name On Card" required>
+				<label for="cardname">Name On Card</label>
 			</div>
 			<div class="mt-2">
-				<p> Expiration Date: <input type="date" name="expiration_date" /> </p>
+				<p> Expiration Date: <input type="date" name="expiration_date" required /> </p>
 			</div>
-			<button type="purchaseFunction" class="btn btn-primary mt-2">Purchase</button>
+			<button type="submit" class="btn btn-primary mt-2">Purchase</button>
 		</form>
 	</div>
+
+	{% if error %}
+	<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
     
 
     <!-- bootstrap scripts -->

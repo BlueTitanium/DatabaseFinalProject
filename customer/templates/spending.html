@@ -24,11 +24,11 @@
     </div>
 
     <div class="d-flex flex-column m-3">
-        <h4 class="mt-3">Total amount of money spent in the past year: </h4> <!-- somehow put in the number here -->
+        <h4 class="mt-3">Total amount of money spent {{total_spending_header}}: {{total_spending_data['total_spending']}}</h4>
     </div>
 
     <div class="d-flex m-3 flex-column">
-		<form action="./" method="POST">
+		<form action="./trackSpendingReq" method="POST">
             <div class="mt-2">
                 <p>
                     <b>Optional Date Range</b>
@@ -36,10 +36,10 @@
                 </p>
             </div>
 			<div class="mt-2">
-				<p> Beginning Date: <input type="date" name="departure_date" /> </p>
+				<p> Beginning Date: <input type="date" name="start_date" required /> </p>
 			</div>
 			<div class="mt-2">
-				<p> End Date: <input type="date" name="return_date" /></p>
+				<p> End Date: <input type="date" name="end_date" required /></p>
 			</div>
 			<button type="searchFunction" class="btn btn-primary mt-2">Search</button>
 		</form>
@@ -48,31 +48,26 @@
 	<div class="container text-center">
 		<div class="row">
 		  <div class="col">
-			<h3 class="m-3">Flights</h3>
-			<!--TO FILL LATER-->
+			<h3 class="m-3">Monthly Spendings History {{chart_data_header}}</h3>
 				<table class="m-3 table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
-							<th> Airline Name </th>
-							<th> Flight Number </th>
-							<th> Departure Time </th>
-							<th> Arrival Time </th>
-							<th> Price </th>
-							<th> Flight Number </th>
-							<th> Departure Airport </th>
-							<th> Arrival Airport </th>
+							<th> Year </th>
+							<th> Month </th>
+							<th> Total Spending </th>
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in departure_flights %}
+						{% for data in chart_data %}
 						<tr>
-							<td>{{flight['airline_name']}}</td>
-							<td>{{flight['flight_num']}}</td>
+							<td>{{data['year']}}</td>
+							<td>{{data['month']}}</td>
+							<td>{{data['total_spending']}}</td>
 						</tr>
 						{% endfor %}
 					</tbody>
 				</table>
-				
+				<a href="./trackSpending" class="btn btn-primary mt-2"> Reset to Default</a>
 		  </div>
 		  
 		</div>

@@ -455,4 +455,4 @@ def viewRevenue():
 @airlinestaff_bp.route('/logout')
 def logout():
 	session.pop('user')
-	return redirect('/')
+	return redirect(url_for('general_bp.staffLogin'))
