@@ -245,7 +245,7 @@ def cancelTicket():
 def ratePreviousFlightsPage():
 	query = "SELECT Flight.*, ticket_id, sold_price"\
 			" FROM Flight NATURAL JOIN Ticket"\
-			" WHERE customer_email = %s AND departure_timestamp < CURRENT_TIMESTAMP()"
+			" WHERE customer_email = %s AND arrival_timestamp < CURRENT_TIMESTAMP()"
 	data = fetchall(query, (session['customer']))
 
 	return render_template("rate.html", previous_flights = data)
@@ -278,11 +278,6 @@ def rate():
 	email = session['customer']
 
 
-	# check the flight is a previous flight
-	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") > datetime.now()):
-		error = "This flight is not a previous flight (has not departed)."
-		return render_template("rateExactFlight.html", flight_data = data, error = error)
-
 	# check customer has flown the flight
 	query = "SELECT Flight.*, ticket_id, sold_price"\
 			" FROM Flight NATURAL JOIN Ticket"\
@@ -291,6 +286,12 @@ def rate():
 
 	if not data:
 		error = "You have not flown this flight before."
+		return render_template("rateExactFlight.html", flight_data = data, error = error)
+
+
+	# check the flight is a previous flight
+	if (data['arrival_timestamp'] > datetime.now()):
+		error = "This flight is not a previous flight (has not arrived)."
 		return render_template("rateExactFlight.html", flight_data = data, error = error)
 
 
@@ -326,25 +327,25 @@ def trackSpending():
 		total_spending_header = "in the last year", total_spending_data = total_spending_data, 
 		chart_data_header = "In the Last 6 Months (Default)", chart_data = chart_data)
 
-#Define route for Track Spending Requests (given date)
+#Define route for Track Spending Requests (given date range)
 @customer_bp.route('/trackSpendingReq', methods = ['GET', 'POST'])
 def trackSpendingReq():
 	#grabs information from the form
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
 
-	#query for total spending in between the time range given
+	#query for total spending in between the date range given
 	query = "SELECT SUM(sold_price) AS total_spending"\
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND"\
-			" DATE(purchase_timestamp) BETWEEN %s AND %s"
+				" DATE(purchase_timestamp) BETWEEN %s AND %s"
 	total_spending_data = fetchone(query, (session['customer'], start_date, end_date))
 
-	#query for spending in each month in time range given
+	#query for spending in each month in date range given
 	query = "SELECT YEAR(purchase_timestamp) AS year, MONTH(purchase_timestamp) AS month, SUM(sold_price) AS total_spending"\
 			" FROM Ticket"\
 			" WHERE customer_email = %s AND"\
-			" DATE(purchase_timestamp) BETWEEN %s AND %s"\
+				" DATE(purchase_timestamp) BETWEEN %s AND %s"\
 			" GROUP BY year, month"
 	chart_data = fetchall(query, (session['customer'], start_date, end_date))
 
@@ -365,4 +366,4 @@ def trackSpendingReq():
 @customer_bp.route('/logout')
 def logout():
 	session.pop('customer')
-	return redirect('/')
+	return redirect(url_for('general_bp.customerLogin'))
