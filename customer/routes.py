@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, session, request, url_for, redirect
 from app_global import *
 from app_public_views import *
-from datetime import datetime
+from datetime import datetime, timedelta
 
 customer_bp = Blueprint('customer_bp', __name__, template_folder='templates')
 
@@ -36,8 +36,8 @@ def viewFlights():
 
 	return render_template("view.html", flights = data)
 
-#Define route for View Future Flights use case (Customer 1)
-# Show all flights
+#Define route for View My Flights use case (Customer 1)
+# Show all flights (including past flights)
 @customer_bp.route('/viewAllFlights')
 def viewAllFlights():
 	query = "SELECT Flight.*, ticket_id, sold_price"\
@@ -178,7 +178,7 @@ def purchaseTicketReq():
 	expiration_date = request.form['expiration_date']
 
 	# check card has not expired
-	if (datetime.strptime(expiration_date, "%Y-%m-%d") <= datetime.now()):
+	if (datetime.strptime(expiration_date, "%Y-%m-%d") < datetime.now()):
 		error = "Card has already expired"
 		return render_template("purchaseExactTicket.html", flight_data = data, error = error)
 
@@ -199,7 +199,7 @@ def purchaseTicketReq():
 def cancelTripPage():
 	query = "SELECT Flight.*, ticket_id, sold_price"\
 			" FROM Flight NATURAL JOIN Ticket"\
-			" WHERE customer_email = %s AND departure_timestamp > CURRENT_TIMESTAMP()"
+			" WHERE customer_email = %s AND departure_timestamp > (CURRENT_TIMESTAMP() + INTERVAL 24 HOUR)"
 	data = fetchall(query, (session['customer']))
 
 	return render_template("cancel.html", cancellable_flights_data = data)
@@ -214,9 +214,23 @@ def cancelTicket():
 	query = "SELECT * FROM Ticket WHERE customer_email = %s AND ticket_id = %s"
 	data = fetchone(query, (customer_email, ticket_id))
 
+	error = None
 	if not data:
 		error = "You are not authorized to cancel this ticket"
-		return render_template("cancel.html", error = error)
+
+	#check that ticket is still cancelable
+	elif (data['departure_timestamp'] <= (datetime.now() + timedelta(hours=24))):
+		error = "Flight departs in 24 hours or less, cannot be cancelled"
+
+	if error:
+		query = "SELECT Flight.*, ticket_id, sold_price"\
+				" FROM Flight NATURAL JOIN Ticket"\
+				" WHERE customer_email = %s AND departure_timestamp > (CURRENT_TIMESTAMP() + INTERVAL 24 HOUR)"
+		data = fetchall(query, (session['customer']))
+
+		# re-render template with cancellable flights data and error
+		return render_template("cancel.html", cancellable_flights_data = data, error = error)
+
 
 	query = "DELETE FROM Ticket WHERE ticket_id = %s"
 	modify(query, (ticket_id))
