@@ -27,16 +27,16 @@
 		<form action="./flightStatus" method="POST">
 			<div class="form-floating mt-2 ">
 				<input type="text" name="airline_name" class="form-control" id="airlineSearchBar"
-					placeholder="Airline Name">
+					placeholder="Airline Name" required>
 				<label for="airlineSearchBar">Airline Name</label>
 			</div>
 			<div class="form-floating mt-2">
 				<input type="text" name="flight_num" class="form-control" id="flightNumber"
-					placeholder="Flight Number">
+					placeholder="Flight Number" required>
 				<label for="flightNumber">Flight Number</label>
 			</div>
 			<div class="mt-2">
-				<p> Departure Date: <input type="date" name="departure_date" /> </p>
+				<p> Departure Date: <input type="date" name="departure_date" required/> </p>
 			</div>
 			<button type="statusFunction" class="btn btn-primary mt-2">Search</button>
 		</form>
