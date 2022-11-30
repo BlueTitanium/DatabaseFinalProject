@@ -61,6 +61,10 @@ class FlightStatusView(View):
                 " FROM Flight"\
                 " WHERE airline_name = %s AND flight_num = %s AND DATE(departure_timestamp) = %s"
         data = fetchone(query, (airline_name, flight_num, departure_date))
-
+        
+        #check that flight exists
+        if not data:
+            error = "Flight does not exist"
+            return render_template(self.template, error = error)
 
         return render_template(self.template, status_airline_name = airline_name, status_flight_num = flight_num, status_departure_date = departure_date, status_data = data)
