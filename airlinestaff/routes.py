@@ -13,12 +13,19 @@ def home():
 
 
 #Define route for Search Future Flights use case (Public Info)
-airlinestaff_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "home.html"), methods = ['GET', 'POST'])
+@airlinestaff_bp.route('/searchFlightsPage')
+def searchFlightsPage():
+	return render_template("search.html")
+#Define route for Search Future Flights use case (Public Info)
+airlinestaff_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "search.html"), methods = ['GET', 'POST'])
 
 
 #Define route for View Flight Status use case (Public Info)
-#TODO: change index.html if necessary
-airlinestaff_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "index.html"), methods = ['GET', 'POST'])
+@airlinestaff_bp.route('/findFlightStatusPage')
+def findFlightStatusPage():
+	return render_template("status.html")
+#Define route for View Flight Status use case Requests (Public Info)
+airlinestaff_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "status.html"), methods = ['GET', 'POST'])
 
 
 #Define route for View Future Flights use case (AirlineStaff 1)
@@ -31,17 +38,17 @@ def viewFlights():
 	# check if logged in
 	if not username:
 		error = "Not logged in"
-		return render_template("view_flights.html", error = error)
+		return render_template("viewFlights.html", error = error)
 
 	query = "SELECT *"\
 			" FROM Flight"\
 			" WHERE airline_name = ("\
 				" SELECT airline_name FROM AirlineStaff WHERE username = %s"\
-			") AND departure_timestamp BETWEEN CURRENT_TIMESTAMP() AND DATEADD(day, 30, CURRENT_TIMESTAMP())"
+			") AND departure_timestamp BETWEEN CURRENT_TIMESTAMP() AND (CURRENT_TIMESTAMP() + INTERVAL 30 DAY)"
 	data = fetchall(query, (username))
 
 	#TODO render template fix if needed
-	return render_template("view_flights.html", flights = data)
+	return render_template("viewFlights.html", flights = data)
 
 #Define route for View Future Flights Search use case (AirlineStaff 1)
 @airlinestaff_bp.route('/viewFlightsSearch', methods=['GET', 'POST'])
@@ -87,6 +94,11 @@ def viewFlightsSearch():
 
 	#TODO render template fix if needed
 	return render_template("view_flights.html", flights = data)
+
+#TODO create route to view all customers for a particular flight
+@airlinestaff_bp.route('/viewFlightCustomers', methods=['GET', 'POST'])
+def viewFlightCustomers():
+	pass
 
 
 #TODO create route to get to the page
