@@ -10,7 +10,7 @@ customer_bp = Blueprint('customer_bp', __name__, template_folder='templates')
 @customer_bp.route('/home')
 def home():
 	user = session['customer']
-	return render_template('home.html', user = user)
+	return render_template('customer/home.html', user = user)
 
 
 #Define route for View Future Flights use case (Customer 1)
@@ -34,7 +34,7 @@ def viewFlights():
 	
 	data = fetchall(query, (session['customer']))
 
-	return render_template("view.html", flights = data)
+	return render_template("customer/view.html", flights = data)
 
 #Define route for View My Flights use case (Customer 1)
 # Show all flights (including past flights)
@@ -45,14 +45,14 @@ def viewAllFlights():
 			" WHERE customer_email = %s"
 
 	data = fetchall(query, (session['customer']))
-	return render_template("view.html", flights = data)
+	return render_template("customer/view.html", flights = data)
 
 
 
 #Define route for Search Future Flights use case (Customer 2, Public Info)
 @customer_bp.route('/searchFlightsPage')
 def searchFlightsPage():
-	return render_template("search.html")
+	return render_template("customer/search.html")
 # Define route for Search Future Flights requests
 '''
 @customer_bp.route('/searchFlights', methods = ['GET', 'POST'])
@@ -60,25 +60,25 @@ def searchFlights():
 	# See dispatch_request(self) in app_public_views.SearchFlightView
 	pass
 '''
-customer_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "search.html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "customer/search.html"), methods = ['GET', 'POST'])
 
 
 
 #Define route for View Flight Status use case (Public Info)
 @customer_bp.route('/findFlightStatusPage')
 def findFlightStatusPage():
-	return render_template("status.html")
+	return render_template("customer/status.html")
 # Define route for View Flight Status Requests
-customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "status.html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "customer/status.html"), methods = ['GET', 'POST'])
 
 
 
 #Define route for Purchase Ticket use case (Customer 3)
 @customer_bp.route('/purchaseTicketPage')
 def purchaseTicketPage():
-	return render_template("purchase.html")
+	return render_template("customer/purchase.html")
 #Define route for showing all purchaseable tickets
-customer_bp.add_url_rule("/searchPurchaseTickets", view_func = SearchFlightsView.as_view("searchPurchaseTickets", "purchase.html"), methods = ['GET', 'POST'])
+customer_bp.add_url_rule("/searchPurchaseTickets", view_func = SearchFlightsView.as_view("searchPurchaseTickets", "customer/purchase.html"), methods = ['GET', 'POST'])
 
 #Define route for form to purchase ticket
 @customer_bp.route('/purchaseTicket', methods=['GET', 'POST'])
@@ -118,9 +118,9 @@ def purchaseTicket():
 		error = "Flight is full"
 
 	if error:
-		return render_template("purchase.html", error = error)
+		return render_template("customer/purchase.html", error = error)
 
-	return render_template("purchaseExactTicket.html", flight_data = data)
+	return render_template("customer/purchaseExactTicket.html", flight_data = data)
 
 #Define route for Purchase Ticket Request
 @customer_bp.route('/purchaseTicketReq', methods=['GET', 'POST'])
@@ -135,7 +135,7 @@ def purchaseTicketReq():
 	#check if user is logged in
 	if not customer_email:
 		error = "Cannot proceed with action. User not logged in."
-		return render_template('purchase.html', error = error)
+		return render_template('customer/purchase.html', error = error)
 
 
 	query = "WITH FlightTicketCount AS ("\
@@ -169,7 +169,7 @@ def purchaseTicketReq():
 		error = "Flight is full"
 
 	if error:
-		return render_template("purchaseExactTicket.html", flight_data = data, error = error)
+		return render_template("customer/purchaseExactTicket.html", flight_data = data, error = error)
 
 	#grabs information from the forms
 	card_type = request.form['card_type']
@@ -180,7 +180,7 @@ def purchaseTicketReq():
 	# check card has not expired
 	if (datetime.strptime(expiration_date, "%Y-%m-%d") < datetime.now()):
 		error = "Card has already expired"
-		return render_template("purchaseExactTicket.html", flight_data = data, error = error)
+		return render_template("customer/purchaseExactTicket.html", flight_data = data, error = error)
 
 	purchase_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -202,7 +202,7 @@ def cancelTripPage():
 			" WHERE customer_email = %s AND departure_timestamp > (CURRENT_TIMESTAMP() + INTERVAL 24 HOUR)"
 	data = fetchall(query, (session['customer']))
 
-	return render_template("cancel.html", cancellable_flights_data = data)
+	return render_template("customer/cancel.html", cancellable_flights_data = data)
 	
 #Define route for cancel ticket request
 @customer_bp.route('/cancelTicket', methods=['GET', 'POST'])
@@ -229,7 +229,7 @@ def cancelTicket():
 		data = fetchall(query, (session['customer']))
 
 		# re-render template with cancellable flights data and error
-		return render_template("cancel.html", cancellable_flights_data = data, error = error)
+		return render_template("customer/cancel.html", cancellable_flights_data = data, error = error)
 
 
 	query = "DELETE FROM Ticket WHERE ticket_id = %s"
@@ -248,7 +248,7 @@ def ratePreviousFlightsPage():
 			" WHERE customer_email = %s AND arrival_timestamp < CURRENT_TIMESTAMP()"
 	data = fetchall(query, (session['customer']))
 
-	return render_template("rate.html", previous_flights = data)
+	return render_template("customer/rate.html", previous_flights = data)
 
 #Define route for Rating Specific Flight
 @customer_bp.route('/rateFlight')
@@ -262,7 +262,7 @@ def rateFlight():
 			" WHERE customer_email = %s AND airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
 	data = fetchone(query, (session['customer'], airline_name, flight_num, departure_timestamp))
 
-	return render_template("rateExactFlight.html", flight_data = data)
+	return render_template("customer/rateExactFlight.html", flight_data = data)
 
 #Define route for Give Ratings Request
 @customer_bp.route('/rate', methods=['GET', 'POST'])
@@ -286,13 +286,13 @@ def rate():
 
 	if not data:
 		error = "You have not flown this flight before."
-		return render_template("rateExactFlight.html", flight_data = data, error = error)
+		return render_template("customer/rateExactFlight.html", flight_data = data, error = error)
 
 
 	# check the flight is a previous flight
 	if (data['arrival_timestamp'] > datetime.now()):
 		error = "This flight is not a previous flight (has not arrived)."
-		return render_template("rateExactFlight.html", flight_data = data, error = error)
+		return render_template("customer/rateExactFlight.html", flight_data = data, error = error)
 
 
 	query = "INSERT INTO Rate VALUES(%s, %s, %s, %s, %s, %s)"
@@ -323,7 +323,7 @@ def trackSpending():
 	chart_data = fetchall(query, (session['customer']))
 
 	# render template
-	return render_template("spending.html", 
+	return render_template("customer/spending.html", 
 		total_spending_header = "in the last year", total_spending_data = total_spending_data, 
 		chart_data_header = "In the Last 6 Months (Default)", chart_data = chart_data)
 
@@ -356,7 +356,7 @@ def trackSpendingReq():
 
 
 	# render template
-	return render_template("spending.html", 
+	return render_template("customer/spending.html", 
 		total_spending_header = total_spending_header, total_spending_data = total_spending_data, 
 		chart_data_header = chart_data_header, chart_data = chart_data)
 

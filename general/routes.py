@@ -8,12 +8,12 @@ general_bp = Blueprint('general_bp', __name__, template_folder='templates')
 #Define route for index
 @general_bp.route('/')
 def index():
-	return render_template('index.html')
+	return render_template('general/index.html')
 
 #Define route for login
 @general_bp.route('/login')
 def login():
-	return render_template('login.html')
+	return render_template('general/login.html')
 
 @general_bp.route('/customerLogin')
 def customerLogin():
@@ -23,11 +23,11 @@ def customerLogin():
 			return redirect(url_for('customer_bp.home'))
 		
 		#otherwise, display login page
-		return render_template('customerLogin.html')
+		return render_template('general/customerLogin.html')
 
 	except KeyError:
 		#otherwise, display login page
-		return render_template('customerLogin.html')
+		return render_template('general/customerLogin.html')
 
 @general_bp.route('/staffLogin')
 def staffLogin():
@@ -37,25 +37,25 @@ def staffLogin():
 			return redirect(url_for('airlinestaff_bp.home'))
 	
 		#otherwise, display login page
-		return render_template('staffLogin.html')
+		return render_template('general/staffLogin.html')
 	except KeyError:
 		#otherwise, display login page
-		return render_template('staffLogin.html')
+		return render_template('general/staffLogin.html')
 
 #Define route for register
 @general_bp.route('/register')
 def register():
-	return render_template('register.html')
+	return render_template('general/register.html')
 
 @general_bp.route('/registerCustomer')
 def registerCustomer():
-	return render_template('registerCustomer.html')
+	return render_template('general/registerCustomer.html')
 
 @general_bp.route('/registerAirlineStaff')
 def registerAirlineStaff():
 	query = "SELECT name FROM Airline"
 	data = fetchall(query, ())
-	return render_template('registerAirlineStaff.html', airline_names = data)
+	return render_template('general/registerAirlineStaff.html', airline_names = data)
 
 
 # --- CUSTOMER LOGIN AND REGISTER ---
@@ -79,7 +79,7 @@ def customerLoginAuth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or email'
-		return render_template('customerLogin.html', error=error)
+		return render_template('general/customerLogin.html', error=error)
 
 #Authenticates the customer register
 @general_bp.route('/customerRegisterAuth', methods=['GET', 'POST'])
@@ -109,7 +109,7 @@ def customerRegisterAuth():
 	if(data):
 		#If the previous query returns data, then user exists
 		error = "This user already exists"
-		return render_template('registerCustomer.html', error = error)
+		return render_template('general/registerCustomer.html', error = error)
 	else:
 		ins_data = (email, name, password, building_number, street, city, state, phone_number, passport_number, passport_expiration, passport_country, date_of_birth)
 		ins = 'INSERT INTO Customer VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
@@ -139,7 +139,7 @@ def airlineStaffLoginAuth():
 	else:
 		#returns an error message to the html page
 		error = 'Invalid login or username'
-		return render_template('staffLogin.html', error=error)
+		return render_template('general/staffLogin.html', error=error)
 
 #Authenticates the airline staff register
 @general_bp.route('/airlineStaffRegisterAuth', methods=['GET', 'POST'])
@@ -171,7 +171,7 @@ def airlineStaffRegisterAuth():
 		query = "SELECT name FROM Airline"
 		data = fetchall(query, ())
 
-		return render_template('registerAirlineStaff.html', airline_names = data, error = error)
+		return render_template('general/registerAirlineStaff.html', airline_names = data, error = error)
 	else:
 		ins = 'INSERT INTO AirlineStaff VALUES(%s, %s, %s, %s, %s, %s)'
 		ins_data = (username, password, firstname, lastname, date_of_birth, airline_name)
@@ -196,7 +196,7 @@ def searchFlights():
 	# See dispatch_request(self) in app_public_views.SearchFlightView
 	pass
 '''
-general_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "index.html"), methods = ['GET', 'POST'])
+general_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "general/index.html"), methods = ['GET', 'POST'])
 
 #Define route for View Flight Status use case (General 1b)
 '''
@@ -205,4 +205,4 @@ def flightStatus():
 	# See dispatch_request(self) in app_public_views.FlightStatusView
 	pass
 '''
-general_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "index.html"), methods = ['GET', 'POST'])
+general_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "general/index.html"), methods = ['GET', 'POST'])

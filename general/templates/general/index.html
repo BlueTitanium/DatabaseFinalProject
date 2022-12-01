@@ -25,16 +25,16 @@
 		<form action="/searchFlights" method="POST">
 			<div class="form-floating mt-2 ">
 				<input type="text" name="departure_info" class="form-control" id="sourceSearchBar"
-					placeholder="Flight name">
+					placeholder="Flight name" required>
 				<label for="sourceSearchBar">Source City / Airport Name</label>
 			</div>
 			<div class="form-floating mt-2">
 				<input type="text" name="destination_info" class="form-control" id="destSearchBar"
-					placeholder="Flight name">
+					placeholder="Flight name" required>
 				<label for="destSearchBar">Destination City / Airport Name</label>
 			</div>
 			<div class="mt-2">
-				<p> Departure Date: <input type="date" name="departure_date" /> </p>
+				<p> Departure Date: <input type="date" name="departure_date" required /> </p>
 			</div>
 			<div class="mt-2">
 				<p> Return Date: <input type="date" name="return_date" /> <small>Leave return date empty for one-way
@@ -48,7 +48,6 @@
 		<div class="row">
 		  <div class="col">
 			<h3 class="m-3">Departures</h3>
-			<!--TO FILL LATER-->
 				<table class="m-3 table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
@@ -79,7 +78,6 @@
 		  </div>
 		  <div class="col">
 			<h3 class="m-3">Arrivals</h3>
-				<!--TO FILL LATER-->
 				<table class="m-3 table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
@@ -116,16 +114,16 @@
 		<form action="/flightStatus" method="POST">
 			<div class="form-floating mt-2 ">
 				<input type="text" name="airline_name" class="form-control" id="airlineSearchBar"
-					placeholder="Airline Name">
+					placeholder="Airline Name" required>
 				<label for="airlineSearchBar">Airline Name</label>
 			</div>
 			<div class="form-floating mt-2">
 				<input type="text" name="flight_num" class="form-control" id="flightNumber"
-					placeholder="Flight Number">
+					placeholder="Flight Number" required>
 				<label for="flightNumber">Flight Number</label>
 			</div>
 			<div class="mt-2">
-				<p> Departure Date: <input type="date" name="departure_date" /> </p>
+				<p> Departure Date: <input type="date" name="departure_date" required /> </p>
 			</div>
 			<button type="statusFunction" class="btn btn-primary mt-2">Search</button>
 		</form>
@@ -135,7 +133,6 @@
 		<div class="row">
 		  <div class="col">
 			<h3 class="m-3">Statuses</h3>
-			<!--TO FILL LATER-->
 				<table class="m-3 table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
@@ -171,9 +168,14 @@
 					</tbody>
 				</table>
 				
-		  </div>
+		  	</div>
 		</div>
-	  </div>
+	</div>
+
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+
 	<!-- bootstrap scripts -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
 		integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
