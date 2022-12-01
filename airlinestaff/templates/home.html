@@ -8,9 +8,28 @@
     </head>
 
     <body>
-        <h1>Airline Staff Home Page</h1>
 
-        <h1> Currently Logged in: {{user}} </h1> <!-- say which user is logged in -->
+        <!-- Navbar content -->
+        <nav class="navbar navbar-expand navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="./home">Airline Reservation System</a>
+            </div>
+            <a class="btn btn-primary m-2" href="./logout">Logout</a>
+        </nav>
+    
+        <div class="d-flex flex-column m-5">
+            <h3> Welcome {% if user %} {{ user}} {% endif %}</h3>
+            <a class="btn btn-primary m-2 btn-lg" href="./createFlight.html">Create Flight</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./addAirplane.html">Add Airplane</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./addNewAirport.html">Add New Airport</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./changeFlightStatus.html">Change Flight Status</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./viewFlights.html">View Flights</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./viewFlightRatings.html">View Flight Ratings</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./viewFrequentCustomers.html">View Frequent Customers</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./viewEarnedRevenue.html">View Earned Revenue</a>
+            <a class="btn btn-primary m-2 btn-lg" href="./viewReports.html">View Reports</a>
+        </div>
+
         
         <!-- bootstrap scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
