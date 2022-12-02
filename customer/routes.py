@@ -334,6 +334,11 @@ def trackSpendingReq():
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
 
+	#check start date and end date is valid
+	if (datetime.strptime(start_date, "%Y-%m-%d") > datetime.strptime(end_date, "%Y-%m-%d")):
+		error = "Start date cannot be after end date"
+		return render_template("customer/spending.html", total_spending_data = None, error = error)
+
 	#query for total spending in between the date range given
 	query = "SELECT SUM(sold_price) AS total_spending"\
 			" FROM Ticket"\
