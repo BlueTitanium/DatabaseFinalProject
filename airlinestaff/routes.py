@@ -2,6 +2,7 @@
 from flask import Blueprint, render_template, session, request, url_for, redirect
 from app_global import *
 from app_public_views import *
+from datetime import datetime
 
 airlinestaff_bp = Blueprint('airlinestaff_bp', __name__, template_folder='templates')
 
@@ -9,28 +10,27 @@ airlinestaff_bp = Blueprint('airlinestaff_bp', __name__, template_folder='templa
 @airlinestaff_bp.route('/home')
 def home():
 	user = session['user']
-	return render_template('home.html', user = user)
+	return render_template('airlinestaff/home.html', user = user)
 
 
 #Define route for Search Future Flights use case (Public Info)
 @airlinestaff_bp.route('/searchFlightsPage')
 def searchFlightsPage():
-	return render_template("search.html")
+	return render_template("airlinestaff/search.html")
 #Define route for Search Future Flights use case (Public Info)
-airlinestaff_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "search.html"), methods = ['GET', 'POST'])
+airlinestaff_bp.add_url_rule("/searchFlights", view_func = SearchFlightsView.as_view("searchFlights", "airlinestaff/search.html"), methods = ['GET', 'POST'])
 
 
 #Define route for View Flight Status use case (Public Info)
 @airlinestaff_bp.route('/findFlightStatusPage')
 def findFlightStatusPage():
-	return render_template("status.html")
+	return render_template("airlinestaff/status.html")
 #Define route for View Flight Status use case Requests (Public Info)
-airlinestaff_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "status.html"), methods = ['GET', 'POST'])
+airlinestaff_bp.add_url_rule("/flightStatus", view_func = FlightStatusView.as_view("flightStatus", "airlinestaff/status.html"), methods = ['GET', 'POST'])
 
 
 #Define route for View Future Flights use case (AirlineStaff 1)
 # Shows default - flight the staff works for for the next 30 days
-#TODO
 @airlinestaff_bp.route('/viewFlights')
 def viewFlights():
 	username = session['user']
@@ -38,17 +38,31 @@ def viewFlights():
 	# check if logged in
 	if not username:
 		error = "Not logged in"
-		return render_template("viewFlights.html", error = error)
+		return render_template("airlinestaff/viewFlights.html", error = error)
 
+	'''
+	# single query
 	query = "SELECT *"\
 			" FROM Flight"\
 			" WHERE airline_name = ("\
 				" SELECT airline_name FROM AirlineStaff WHERE username = %s"\
 			") AND departure_timestamp BETWEEN CURRENT_TIMESTAMP() AND (CURRENT_TIMESTAMP() + INTERVAL 30 DAY)"
 	data = fetchall(query, (username))
+	'''
 
-	#TODO render template fix if needed
-	return render_template("viewFlights.html", flights = data)
+	# get airline name (separately, so it can be displayed)
+	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
+	staff_airline_name = fetchone(query, (username))
+
+	# get flights
+	query = "SELECT *"\
+			" FROM Flight"\
+			" WHERE airline_name = %s"\
+				" AND departure_timestamp BETWEEN CURRENT_TIMESTAMP() AND (CURRENT_TIMESTAMP() + INTERVAL 30 DAY)"
+	data = fetchall(query, (staff_airline_name['airline_name']))
+
+	# render template
+	return render_template("airlinestaff/viewFlights.html", header = "In the Next 30 Days (Default)", airline = staff_airline_name['airline_name'], flights = data)
 
 #Define route for View Future Flights Search use case (AirlineStaff 1)
 @airlinestaff_bp.route('/viewFlightsSearch', methods=['GET', 'POST'])
@@ -58,53 +72,127 @@ def viewFlightsSearch():
 	# check if logged in
 	if not username:
 		error = "Not logged in"
-		return render_template("view_flights.html", error = error)
+		return render_template("airlinestaff/viewFlights.html", error = error)
 
 	# check dates
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
 
+
+	'''
+	# single query 
 	query = "SELECT *"\
 			" FROM Flight AS F, Airport AS D, Airport AS A"\
-			" WHERE WHERE F.departure_airport = D.name AND F.arrival_airport = A.name"\
+			" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name"\
 			" AND airline_name = ("\
 				" SELECT airline_name FROM AirlineStaff WHERE username = %s"\
 			")"
-	parameters = (username)
-	
+	parameters = (username,) #, required so Python will recognize () as tuple, or else (username) is str
+	'''
+
+	# get airline name (separately, so it can be displayed)
+	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
+	staff_airline_name = fetchone(query, (username))
+
+	# get flights
+	query = "SELECT *"\
+			" FROM Flight AS F, Airport AS D, Airport AS A"\
+			" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name"\
+			" AND airline_name = %s"
+	parameters = ((staff_airline_name['airline_name']),)
+
+
+	# start date + end date (departure)
+	header = ""
 	if ((start_date or end_date) and not(start_date and end_date)):
 		error = "Start date and end date both must be filled out if date is entered for either"
-		return render_template("view_flights.html", error = error)
+		return render_template("airlinestaff/viewFlights.html", airline = staff_airline_name['airline_name'], error = error)
 
 	if (start_date and end_date):
+		if (datetime.strptime(start_date, "%Y-%m-%d") > datetime.strptime(end_date, "%Y-%m-%d")):
+			error = "Start date cannot be after end date"
+			return render_template("airlinestaff/viewFlights.html", airline = staff_airline_name['airline_name'], error = error)
+
 		query += " AND DATE(departure_timestamp) BETWEEN %s AND %s"
-		parameters += (start_date, end_date)
+		header += "Between " + start_date + " and " + end_date + " "
+		parameters = parameters + (start_date, end_date)
+	
 
 	# departure airport/city
 	departure_info = request.form['departure_info']
 	if (departure_info):
+		formatted_departure_info = '%' + departure_info +'%'
+
 		query += " AND (UPPER(F.departure_airport) LIKE UPPER(%s) OR UPPER(D.city) LIKE UPPER(%s))"
-		parameters += (departure_info, departure_info)
+		header += "Flying From Airport/City Containing " + departure_info + " "
+		parameters = parameters + (formatted_departure_info, formatted_departure_info)
 
 	# arrival airport/city
 	arrival_info = request.form['arrival_info']
 	if (arrival_info):
-		query += "(UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s))"
-		parameters += (arrival_info, arrival_info)
+		formatted_arrival_info = '%' + arrival_info + '%'
 
-	#TODO render template fix if needed
-	return render_template("view_flights.html", flights = data)
+		query += " AND (UPPER(F.arrival_airport) LIKE UPPER(%s) OR UPPER(A.city) LIKE UPPER(%s))"
+		header += "Flying To Airport/City Containing " + arrival_info + " "
+		parameters = parameters + (formatted_arrival_info, formatted_arrival_info)
 
-#TODO create route to view all customers for a particular flight
+
+	# execute query
+	data = fetchall(query, (parameters))
+
+	#render template
+	return render_template("airlinestaff/viewFlights.html", airline = staff_airline_name['airline_name'], header = header, flights = data)
+
+#Define route to view all customers for a particular flight
 @airlinestaff_bp.route('/viewFlightCustomers', methods=['GET', 'POST'])
 def viewFlightCustomers():
-	pass
+	# get arguments
+	airline_name = request.args['airline_name']
+	flight_num = request.args['flight_num']
+	departure_timestamp = request.args['departure_timestamp']
+
+	# execute query
+	query = "SELECT email, name, building_number, street, city, state, phone_number, date_of_birth, ticket_id, sold_price"\
+			" FROM Customer JOIN Ticket ON (Customer.email = Ticket.customer_email)"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	data = fetchall(query, (airline_name, flight_num, departure_timestamp))
+	
+	# render template
+	return render_template("airlinestaff/viewFlightCustomers.html", 
+		airline_name = airline_name, flight_num = flight_num, departure_timestamp = departure_timestamp, 
+		customers = data)
 
 
-#TODO create route to get to the page
-#Define route for Create New Flights Requests (use case 2)
-@airlinestaff_bp.route('/createFlightReq', methods=['GET', 'POST'])
-def createFlightReq():
+#Define route for the Create New Flights Page (Airline Staff 2)
+@airlinestaff_bp.route('/createFlightPage')
+def createFlightPage():
+	error = request.args.get('error', None) # gets (optional) error message
+
+	# get airports to be set for form
+	query = "SELECT name FROM Airport"
+	airports = fetchall(query, ())
+
+	# get airline name to be set for page
+	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
+	airline_name = fetchone(query, (session['user']))
+
+	# get airplane ids to be set for form
+	query = "SELECT DISTINCT id FROM Airplane WHERE name = %s"
+	airplanes = fetchall(query, (airline_name['airline_name']))
+
+	# get flights
+	query = "SELECT *"\
+			" FROM Flight"\
+			" WHERE airline_name = %s"\
+				" AND departure_timestamp BETWEEN CURRENT_TIMESTAMP() AND (CURRENT_TIMESTAMP() + INTERVAL 30 DAY)"
+	data = fetchall(query, (airline_name['airline_name']))
+
+	return render_template("airlinestaff/createFlight.html", 
+		airports = airports, airline = airline_name['airline_name'], airplanes = airplanes, flights = data, error = error)
+
+#Define route for Create New Flights Requests (Airline Staff 2)
+@airlinestaff_bp.route('/createFlight', methods=['GET', 'POST'])
+def createFlight():
 	username = session['user']
 	error = None
 
@@ -116,9 +204,10 @@ def createFlightReq():
 		
 	if not data:
 		error = "Not authorized to create a flight"
-		return render_template("create_flight.html", error = error)
+		return redirect(url_for('.createFlightPage', error = error))
 
 	#grabs information from the form
+	flight_num = request.form['flight_num']
 	departure_timestamp = request.form['departure_timestamp']
 	arrival_timestamp = request.form['arrival_timestamp']
 	base_price = request.form['base_price']
@@ -132,26 +221,52 @@ def createFlightReq():
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
 
+
 	#check that departure airport and arrival airport exists
-	query = "SELECT * FROM Airport WHERE name = %s" #XXX maybe make the page have a dropdown where it selects from existing airports instead.. would be easier
+	query = "SELECT * FROM Airport WHERE name = %s"
 	if (not fetchone(query, (departure_airport))):
 		error = "Departure airport does not exist in database"
-		return render_template("create_flight.html", error = error) #TODO change html name
+		return redirect(url_for('.createFlightPage', error = error))
 
 	if (not fetchone(query, (arrival_airport))):
 		error = "Arrival airport does not exist in database"
-		return render_template("create_flight.html", error = error) #TODO change html name
+		return redirect(url_for('.createFlightPage', error = error))
 
 	#check that airplane id exists
-	query = "SELECT * FROM Airplane WHERE id = %s" #XXX maybe make the page have a dropdown where it selects from existing airplane ids instead.. would be easier
+	query = "SELECT * FROM Airplane WHERE id = %s"
 	if (not fetchone(query, (airplane_id))):
 		error = "Airplane ID does not exist in database"
-		return render_template("create_flight.html", error = error) #TODO change html name
+		return redirect(url_for('.createFlightPage', error = error))
 
-	query = "INSERT INTO Flight VALUES(%s, %s, %s, %s, %.2f, %s, %s, %s, %s)"
-	modify(query, (airline_name, flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id))
 
-	#TODO return template or redirect
+	#check that it is a future flight
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%dT%H:%M") <= datetime.now()):
+		error = "Departure time cannot be before current time"
+		return redirect(url_for('.createFlightPage', error = error))
+
+	#check that departure time is before arrival time
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%dT%H:%M") >= datetime.strptime(arrival_timestamp, "%Y-%m-%dT%H:%M")):
+		error = "Start date cannot be after end date"
+		return redirect(url_for('.createFlightPage', error = error))
+
+
+	# convert timestamps into uniform SQL format
+	departure_timestamp = datetime.strptime(departure_timestamp, "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M:%S")
+	arrival_timestamp = datetime.strptime(arrival_timestamp, "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M:%S")
+
+
+	# check that flight is unique
+	query = "SELECT * FROM Flight WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	if (fetchone(query, (airline_name['airline_name'], flight_num, departure_timestamp))):
+		error = "Flight already exists"
+		return redirect(url_for('.createFlightPage', error = error))
+
+
+	query = "INSERT INTO Flight VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+	modify(query, (airline_name['airline_name'], flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id))
+
+	# return redirect
+	return redirect(url_for('.createFlightPage'))
 
 #XXX need to discuss how to get flight info
 #TODO define route to page
@@ -169,7 +284,7 @@ def changeFlightReq(airline_name, flight_num, departure_timestamp):
 		
 	if not data:
 		error = "Not authorized to create a flight"
-		return render_template("change_flight.html", error = error)
+		return render_template("airlinestaff/change_flight.html", error = error)
 
 	#grabs information from the form
 	status = request.form['status']
@@ -196,7 +311,7 @@ def addAirplane():
 		
 	if not data:
 		error = "Not authorized to create a flight"
-		return render_template("change_flight.html", error = error)
+		return render_template("airlinestaff/change_flight.html", error = error)
 
 	id = request.form['id']
 	num_seats = request.form['num_seats']
@@ -215,7 +330,7 @@ def addAirplane():
 #Define route for Add Airport
 @airlinestaff_bp.route('/addAirport')
 def addAirport():
-	return render_template('/add_airport.html')
+	return render_template('airlinestaff/add_airport.html')
 
 #TODO
 @airlinestaff_bp.route('/addAirportReq', methods=['GET', 'POST'])
@@ -231,7 +346,7 @@ def addAirportReq():
 		
 	if not data:
 		error = "Not authorized to create a flight"
-		return render_template("add_airport.html", error = error)
+		return render_template("airlinestaff/add_airport.html", error = error)
 
 	#grabs information from the form
 	name = request.form['name']
@@ -254,7 +369,7 @@ def addAirportReq():
 def viewFlightRatingReq(flight_num, departure_timestamp):
 	# check if logged in
 	if not (session['user']):
-		return render_template(".html", error = "Not logged in") #TODO change name
+		return render_template("airlinestaff/.html", error = "Not logged in") #TODO change name
 		
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
@@ -276,11 +391,11 @@ def viewFlightRatingReq(flight_num, departure_timestamp):
 	# check if there are ratings
 	if not query:
 		error = "No ratings or comments available for this flight"
-		return render_template('view_flight_ratings.html', error = error)
+		return render_template('airlinestaff/view_flight_ratings.html', error = error)
 	'''
 
 	#TODO return
-	return render_template('view_flight_ratings.html', avg_rating = avg_rating, ratings = ratings)
+	return render_template('airlinestaff/view_flight_ratings.html', avg_rating = avg_rating, ratings = ratings)
 
 
 #Define route for View Frequent Customers
@@ -289,7 +404,7 @@ def viewFlightRatingReq(flight_num, departure_timestamp):
 def viewFreqCustomer():
 	# check if logged in
 	if not (session['user']):
-		return render_template(".html", error = "Not logged in") #TODO change name
+		return render_template("airlinestaff/.html", error = "Not logged in") #TODO change name
 
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
@@ -351,13 +466,13 @@ def viewCustomerReq(customer_email):
 #Define route for total amounts of ticket sold
 @airlinestaff_bp.route('/viewReports')
 def viewReports():
-	return render_template("view_reports.html")
+	return render_template("airlinestaff/view_reports.html")
 
 @airlinestaff_bp.route('/viewReportLastYear')
 def viewReportLastYear():
 	# check if logged in
 	if not (session['user']):
-		return render_template("view_reports.html", error = "Not logged in")
+		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
 
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
@@ -377,13 +492,13 @@ def viewReportLastYear():
 			" GROUP BY MONTH(purchase_timestamp)"
 	chart_data = fetchall(query, (airline_name))
 
-	return render_template("view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
+	return render_template("airlinestaff/view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
 
 @airlinestaff_bp.route('/viewReportLastMonth')
 def viewReportLastMonth():
 	# check if logged in
 	if not (session['user']):
-		return render_template("view_reports.html", error = "Not logged in")
+		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
 
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
@@ -402,13 +517,13 @@ def viewReportLastMonth():
 			" GROUP BY MONTH(purchase_timestamp)"
 	chart_data = fetchall(query, (airline_name))
 
-	return render_template("view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
+	return render_template("airlinestaff/view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
 	
 @airlinestaff_bp.route('/viewReportReq', methods=['GET', 'POST'])
 def viewReportReq():
 	# check if logged in
 	if not (session['user']):
-		return render_template("view_reports.html", error = "Not logged in")
+		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
 
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
@@ -433,7 +548,7 @@ def viewReportReq():
 			" GROUP BY MONTH(purchase_timestamp)"
 	chart_data = fetchall(query, (airline_name, start_date, end_date))
 
-	return render_template("view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
+	return render_template("airlinestaff/view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
 
 
 
@@ -442,7 +557,7 @@ def viewReportReq():
 def viewRevenue():
 	# check if logged in
 	if not (session['user']):
-		return render_template("view_reports.html", error = "Not logged in")
+		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
 
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
@@ -460,7 +575,7 @@ def viewRevenue():
 			" WHERE airline_name = %s AND purchase_timestamp >= DATEADD(month, -1, CURRENT_TIMESTAMP())"
 	total_tickets = fetchone(query, (airline_name))
 
-	return render_template("view_revenue.html", last_month_revenue = last_month_revenue, last_year_revenue = last_year_revenue)
+	return render_template("airlinestaff/view_revenue.html", last_month_revenue = last_month_revenue, last_year_revenue = last_year_revenue)
 
 
 #Define route for logout
