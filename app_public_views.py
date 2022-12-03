@@ -21,7 +21,7 @@ class SearchFlightsView(View):
         #executes query and stores the results in a variable
         query = "WITH FlightTicketCount AS ("\
                     " SELECT airline_name, flight_num, departure_timestamp, COUNT(ticket_id) AS ticket_count"\
-                    " FROM Ticket"\
+                    " FROM Flight NATURAL LEFT OUTER JOIN Ticket"\
                     " GROUP BY airline_name, flight_num, departure_timestamp"\
                 ")"\
                 " SELECT *, CASE"\
@@ -35,15 +35,14 @@ class SearchFlightsView(View):
                     " DATE(F.departure_timestamp) = %s AND status <> 'canceled'"\
                     " AND ticket_count < num_seats"
         departure_flights_data = fetchall(query, (formatted_departure_info, formatted_departure_info, formatted_destination_info, formatted_destination_info, departure_date))
-        arrival_flights_data = []
+        return_flights_data = []
 
         # for round trips
         if (return_date):
             #executes query and stores the results in a variable
-            arrival_flights_data = fetchall(query, (formatted_destination_info, formatted_destination_info, formatted_departure_info, formatted_departure_info, return_date))
-
+            return_flights_data = fetchall(query, (formatted_destination_info, formatted_destination_info, formatted_departure_info, formatted_departure_info, return_date))
         
-        return render_template(self.template, departure_flights = departure_flights_data, arrival_flights = arrival_flights_data)
+        return render_template(self.template, departure_flights = departure_flights_data, return_flights = return_flights_data)
 
 
 class FlightStatusView(View):

@@ -89,7 +89,7 @@ def purchaseTicket():
 
 	query = "WITH FlightTicketCount AS ("\
 				" SELECT airline_name, flight_num, departure_timestamp, COUNT(ticket_id) AS ticket_count"\
-				" FROM Ticket"\
+				" FROM Flight NATURAL LEFT OUTER JOIN Ticket"\
 				" GROUP BY airline_name, flight_num, departure_timestamp"\
 			")"\
 			" SELECT *, CASE"\
@@ -140,7 +140,7 @@ def purchaseTicketReq():
 
 	query = "WITH FlightTicketCount AS ("\
 				" SELECT airline_name, flight_num, departure_timestamp, COUNT(ticket_id) AS ticket_count"\
-				" FROM Ticket"\
+				" FROM Flight NATURAL LEFT OUTER JOIN Ticket"\
 				" GROUP BY airline_name, flight_num, departure_timestamp"\
 			")"\
 			" SELECT *, CASE"\

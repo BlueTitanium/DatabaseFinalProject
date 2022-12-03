@@ -85,7 +85,7 @@
 		  </div>
 
 		  <div class="col">
-			<h3 class="">Arrivals</h3>
+			<h3 class="">Returns</h3>
 				<table class="table table-striped-columns">
 					<thead class="table-dark">
 						<tr>
@@ -100,7 +100,7 @@
 						</tr>
 					</thead>
 					<tbody class="table-group-divider">
-						{% for flight in arrival_flights %}
+						{% for flight in return_flights %}
 						<tr>
 							<td>{{flight['airline_name']}}</td>
 							<td>{{flight['flight_num']}}</td>
@@ -109,6 +109,11 @@
 							<td>{{flight['sell_price']}}</td>
 							<td>{{flight['departure_airport']}}</td>
 							<td>{{flight['arrival_airport']}}</td>
+							<td>
+								<a href="./purchaseTicket?airline_name={{flight['airline_name']}}&flight_num={{flight['flight_num']}}&departure_timestamp={{flight['departure_timestamp']}}">
+									Click to Purchase
+								</a>
+							</td>
 						</tr>
 						{% endfor %}
 					</tbody>
