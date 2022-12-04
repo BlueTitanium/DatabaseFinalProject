@@ -19,36 +19,33 @@
     </nav>
 
     <div class="d-flex flex-column m-3">
-        <a class="btn btn-secondary btn-lg" href="./home">Back</a>
+        <a class="btn btn-secondary btn-lg" href="./viewFlightRatingsPage">Back</a>
     </div>
 
-    <!-- Airline Staff will be able to see each flight’s average ratings 
-        and all the comments and ratings of that flight given by the customers. -->
+    <!-- table of comments + ratings of the flight with which customer (email)-->
     <div class="container text-center">
+        <div class="row">
+            <h3 class="m-3">{{airline}} Flight Ratings</h3>
+            <h5 class="m-3">Flight Number: {{flight_num}}</h5>
+            <h5 class="m-3">Departure Timestamp: {{departure_timestamp}}</h5>
+        </div>
         <div class="row">
             <div class="col">
             <!--table of average ratings + flight-->
-            <h3>{{airline}} Flights Ratings</h3>
             <table class="m-3 table table-striped-columns">
                 <thead class="table-dark">
                     <tr>
-                        <th>Flight Number</th>
-                        <th>Departure Timestamp</th>
-                        <th>Average Rating</th>
-                        <th>View Customer Ratings</th>
+                        <th>Customer Email</th>
+                        <th>Rating</th>
+                        <th>Comments</th>
                     </tr>
                 </thead>
                 <tbody class="table-group-divider">
-                    {% for flight in flights_avg_rating %}
+                    {% for rating in ratings %}
                         <tr>
-                            <td>{{flight['flight_num']}}</td>
-                            <td>{{flight['departure_timestamp']}}</td>
-                            <td>{{flight['avg_rating']}}</td>
-                            <td>
-                                <a href="./viewFlightRating?flight_num={{flight['flight_num']}}&departure_timestamp={{flight['departure_timestamp']}}">
-                                    View Flight Ratings
-                                </a>
-                            </td>
+                            <td>{{rating['email']}}</td>
+                            <td>{{rating['rating']}}</td>
+                            <td>{{rating['comment']}}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

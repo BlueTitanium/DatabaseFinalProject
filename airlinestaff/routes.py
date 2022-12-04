@@ -428,41 +428,44 @@ def addAirport():
 
 
 
-#Define route for View Flight Ratings
-#XXX may need another route that directs to view flight page depending on how web pages are structured
-#TODO
-#XXX need to get flight_num, departure_timestamp somehow -- either by GET parameters or form request
-@airlinestaff_bp.route('/viewFlightRatingReq', methods=['GET', 'POST'])
-def viewFlightRatingReq(flight_num, departure_timestamp):
-	# check if logged in
-	if not (session['user']):
-		return render_template("airlinestaff/.html", error = "Not logged in") #TODO change name
-		
+#Define route for View Flight Average Ratings (Airline Staff 6)
+@airlinestaff_bp.route('/viewFlightRatingsPage')
+def viewFlightRatingsPage():	
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
 
 	# Get average rating
-	query = "SELECT AVG(rating)"\
-			" FROM Rate"\
-			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
-	avg_rating = fetchone(query, (session['user'], flight_num, departure_timestamp))
+	query = "SELECT flight_num, departure_timestamp, AVG(rating) AS avg_rating"\
+			" FROM Flight NATURAL LEFT OUTER JOIN Rate"\
+			" WHERE airline_name = %s"\
+			" GROUP BY flight_num, departure_timestamp"
+	flights_avg_rating = fetchall(query, (airline_name["airline_name"]))
+
+	return render_template("airlinestaff/viewFlightRatings.html", 
+		airline = airline_name['airline_name'], flights_avg_rating = flights_avg_rating)
+
+#Define route for View Flight Ratings (Specific Flight) (Airline Staff 6)
+@airlinestaff_bp.route('/viewFlightRating')
+def viewFlightRating():
+	flight_num = request.args['flight_num']
+	departure_timestamp = request.args['departure_timestamp']
+
+	#grabs airline_name information from session and query data
+	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
+	airline_name = fetchone(query, (session['user']))
 
 	# Get all ratings and comments
 	query = "SELECT *"\
 			" FROM Rate"\
 			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
-	ratings = fetchall(query, (session['user'], flight_num, departure_timestamp))
+	ratings = fetchall(query, (airline_name['airline_name'], flight_num, departure_timestamp))
 
-	'''
-	# check if there are ratings
-	if not query:
-		error = "No ratings or comments available for this flight"
-		return render_template('airlinestaff/view_flight_ratings.html', error = error)
-	'''
+	# return render template
+	return render_template('airlinestaff/viewSpecificFlightRating.html', 
+		airline = airline_name['airline_name'], flight_num = flight_num, departure_timestamp = departure_timestamp,
+		ratings = ratings)
 
-	#TODO return
-	return render_template('airlinestaff/view_flight_ratings.html', avg_rating = avg_rating, ratings = ratings)
 
 
 #Define route for View Frequent Customers
