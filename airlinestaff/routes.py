@@ -605,27 +605,24 @@ def viewReportReq():
 #Define route for view revenue
 @airlinestaff_bp.route('/viewRevenue')
 def viewRevenue():
-	# check if logged in
-	if not (session['user']):
-		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
-
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
 
 	#query for total tickets sold in last year
-	query = "SELECT SUM(sold_price)"\
+	query = "SELECT SUM(sold_price) AS last_year_revenue"\
 			" FROM Ticket"\
-			" WHERE airline_name = %s AND purchase_timestamp >= DATEADD(year, -1, CURRENT_TIMESTAMP())"
-	total_tickets = fetchone(query, (airline_name))
+			" WHERE airline_name = %s AND DATE(purchase_timestamp) >= DATE(CURRENT_TIMESTAMP() - INTERVAL 1 YEAR)"
+	last_year_revenue = fetchone(query, (airline_name['airline_name']))
 
 	#query for total tickets sold in last month
-	query = "SELECT SUM(sold_price)"\
+	query = "SELECT SUM(sold_price) AS last_month_revenue"\
 			" FROM Ticket"\
-			" WHERE airline_name = %s AND purchase_timestamp >= DATEADD(month, -1, CURRENT_TIMESTAMP())"
-	total_tickets = fetchone(query, (airline_name))
+			" WHERE airline_name = %s AND DATE(purchase_timestamp) >= DATE(CURRENT_TIMESTAMP() - INTERVAL 1 MONTH)"
+	last_month_revenue = fetchone(query, (airline_name['airline_name']))
 
-	return render_template("airlinestaff/view_revenue.html", last_month_revenue = last_month_revenue, last_year_revenue = last_year_revenue)
+	return render_template("airlinestaff/viewEarnedRevenue.html", airline = airline_name['airline_name'],
+		last_month_revenue = last_month_revenue['last_month_revenue'], last_year_revenue = last_year_revenue['last_year_revenue'])
 
 
 #Define route for logout
