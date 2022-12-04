@@ -197,12 +197,14 @@ def purchaseTicketReq():
 #Define route for Cancel Ticket Page (Customer 4)
 @customer_bp.route('/cancelTripPage')
 def cancelTripPage():
+	error = request.args.get('error', None)
+
 	query = "SELECT Flight.*, ticket_id, sold_price"\
 			" FROM Flight NATURAL JOIN Ticket"\
 			" WHERE customer_email = %s AND departure_timestamp > (CURRENT_TIMESTAMP() + INTERVAL 24 HOUR)"
 	data = fetchall(query, (session['customer']))
 
-	return render_template("customer/cancel.html", cancellable_flights_data = data)
+	return render_template("customer/cancel.html", cancellable_flights_data = data, error = error)
 	
 #Define route for cancel ticket request
 @customer_bp.route('/cancelTicket', methods=['GET', 'POST'])
@@ -223,13 +225,8 @@ def cancelTicket():
 		error = "Flight departs in 24 hours or less, cannot be cancelled"
 
 	if error:
-		query = "SELECT Flight.*, ticket_id, sold_price"\
-				" FROM Flight NATURAL JOIN Ticket"\
-				" WHERE customer_email = %s AND departure_timestamp > (CURRENT_TIMESTAMP() + INTERVAL 24 HOUR)"
-		data = fetchall(query, (session['customer']))
-
 		# re-render template with cancellable flights data and error
-		return render_template("customer/cancel.html", cancellable_flights_data = data, error = error)
+		return redirect(url_for('.cancelTripPage', error = error))
 
 
 	query = "DELETE FROM Ticket WHERE ticket_id = %s"
