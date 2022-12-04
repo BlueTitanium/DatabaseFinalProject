@@ -25,20 +25,22 @@
 				<p>Staff Login</p>
 			</header>
 
-		<form action="/airlineStaffLoginAuth" method="POST">
-			<label>Username:</label>
-			<input type="text" name = "username" placeholder="email" required/> </br>
-			<label>Password:</label>
-			<input type="password" name = "password" placeholder="password" required/></br>
-			<div id="buttonHolder">
-				<input class="inputButton" type="submit" value = Login />
-			</div>
+			<form action="/airlineStaffLoginAuth" method="POST">
+				<label>Username:</label>
+				<input type="text" name = "username" placeholder="Username" required/> </br>
 
-			{% if error %}
-				<p class="error"><strong>Error:</strong> {{error}}</p>
-			{% endif %}
+				<label>Password:</label>
+				<input type="password" name = "password" placeholder="password" required/></br>
 
-		</form>
+				<div id="buttonHolder">
+					<input class="inputButton" type="submit" value = Login />
+				</div>
+
+				{% if error %}
+					<p class="error"><strong>Error:</strong> {{error}}</p>
+				{% endif %}
+
+			</form>
 
 		</div>
 

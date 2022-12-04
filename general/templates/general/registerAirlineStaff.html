@@ -22,29 +22,33 @@
 	<div class="m-3">
 		<a class="btn btn-secondary" href="/register">Back</a>
 		<h3>Airline Staff Registration Form</h3>
-					<!-- Staff Login -->
-					<form action="/airlineStaffRegisterAuth" method="POST">
-						<input type="email" name="email" placeholder="email" required /> <br />
-						<input type="text" name="username" placeholder="username" required /> <br />
-						<input type="password" name="password" placeholder="password" required /><br />
-						<input type="text" name="firstname" placeholder="first name" required /><br />
-						<input type="text" name="lastname" placeholder="last name" required /><br />
-						<input type="tel" name="phone_number" placeholder="Phone Number"
-							pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required /><br />
-						<small>Format: 123-456-7890</small><br>
 
-						<input type="date" name="date_of_birth" placeholder="Date Of Birth" required /><br /><small>Date of Birth</small><br>
-						<label for="airline_name">Airline Name:</label>
-						<select name = "airline_name">
-							{% for data in airline_names %}
-								<option value="{{data['name']}}">{{data['name']}}</option>
-							{% endfor %}
-						</select>
-						<input type="submit" value=Register />
-						{% if error %}
-						<p class="error"><strong>Error:</strong> {{error}}</p>
-						{% endif %}
-					</form>
+		<!-- Staff Login -->
+		<form action="/airlineStaffRegisterAuth" method="POST">
+			<input type="email" name="email" placeholder="email" required /> <br />
+			<input type="text" name="username" placeholder="username" required /> <br />
+			<input type="password" name="password" placeholder="password" required /><br />
+			<input type="text" name="firstname" placeholder="first name" required /><br />
+			<input type="text" name="lastname" placeholder="last name" required /><br />
+			<input type="tel" name="phone_number" placeholder="Phone Number"
+				pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required /><br />
+			<small>Format: 123-456-7890</small><br>
+
+			<input type="date" name="date_of_birth" placeholder="Date Of Birth" required /><br /><small>Date of Birth</small><br>
+			
+			<label for="airline_name">Airline Name:</label>
+			<select name = "airline_name">
+				{% for data in airline_names %}
+					<option value="{{data['name']}}">{{data['name']}}</option>
+				{% endfor %}
+			</select>
+
+			<input type="submit" value=Register />
+
+			{% if error %}
+				<p class="error"><strong>Error:</strong> {{error}}</p>
+			{% endif %}
+		</form>
 	</div>
 
 

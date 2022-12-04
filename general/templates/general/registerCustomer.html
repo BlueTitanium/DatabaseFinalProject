@@ -23,36 +23,38 @@
 	<div class="m-3">
 		<a class="btn btn-secondary" href="/register">Back</a>
 		<h3>Customer Registration Form</h3>
-					<form action="/customerRegisterAuth" method="POST">
+		<form action="/customerRegisterAuth" method="POST">
 
-						<input type="email" name="email" placeholder="email" required /> <br />
-						<input type="password" name="password" placeholder="password" required /><br />
+			<input type="email" name="email" placeholder="email" required /> <br />
+			<input type="password" name="password" placeholder="password" required /><br />
 
-						<input type="text" name="name" placeholder="name" required /><br />
-						<input type="text" name="building_number" placeholder="building_number" required /><br />
-						<input type="text" name="street" placeholder="street" required /><br />
-						<input type="text" name="city" placeholder="city" required /><br />
-						<input type="text" name="state" placeholder="state" required /><br />
-						<input type="tel" name="phone_number" placeholder="Phone Number"
-							pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required /><br />
-						<small>Format: 123-456-7890</small><br>
+			<input type="text" name="name" placeholder="name" required /><br />
+			<input type="text" name="building_number" placeholder="building_number" required /><br />
+			<input type="text" name="street" placeholder="street" required /><br />
+			<input type="text" name="city" placeholder="city" required /><br />
+			<input type="text" name="state" placeholder="state" required /><br />
+			<input type="tel" name="phone_number" placeholder="Phone Number"
+				pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" required /><br />
+			<small>Format: 123-456-7890</small><br>
 
-						<input type="text" name="passport_number" placeholder="Passport Number"
-							pattern="[A-Z]{1}[0-9]{8}" required /><br />
-						<small>Format (Next-Generation Passports): A12345678</small><br>
+			<input type="text" name="passport_number" placeholder="Passport Number"
+				pattern="[A-Z]{1}[0-9]{8}" required /><br />
+			<small>Format (Next-Generation Passports): A12345678</small><br>
 
-						<input type="date" name="passport_expiration" placeholder="Passport Expiration"
-							required /><br />
-							<small>Passport Expiration Date</small><br>
-						<input type="text" name="passport_country" placeholder="Passport Country" required /><br />
+			<input type="date" name="passport_expiration" placeholder="Passport Expiration"
+				required /><br />
+			<small>Passport Expiration Date</small><br>
+			
+			<input type="text" name="passport_country" placeholder="Passport Country" required /><br />
 
-						<input type="date" name="date_of_birth" placeholder="Date Of Birth" required /><br /><small>Date of Birth</small><br>
+			<input type="date" name="date_of_birth" placeholder="Date Of Birth" required /><br /><small>Date of Birth</small><br>
 
-						<input type="submit" value=Register />
-						{% if error %}
-						<p class="error"><strong>Error:</strong> {{error}}</p>
-						{% endif %}
-					</form>
+			<input type="submit" value=Register />
+
+			{% if error %}
+				<p class="error"><strong>Error:</strong> {{error}}</p>
+			{% endif %}
+		</form>
 	</div>
 
 

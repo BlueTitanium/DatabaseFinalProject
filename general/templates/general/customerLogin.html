@@ -26,20 +26,20 @@
 				<p>Customer Login</p>
 			</header>
 
-		<form action="/customerLoginAuth" method="POST">
-			<label>Email:</label>
-			<input type="text" name = "email" placeholder="email" required/> </br>
-			<label>Password:</label>
-			<input type="password" name = "password" placeholder="password" required/></br>
-			<div id="buttonHolder">
-				<input class="inputButton" type="submit" value = Login />
-			</div>
+			<form action="/customerLoginAuth" method="POST">
+				<label>Email:</label>
+				<input type="text" name = "email" placeholder="email" required/> </br>
+				<label>Password:</label>
+				<input type="password" name = "password" placeholder="password" required/></br>
+				<div id="buttonHolder">
+					<input class="inputButton" type="submit" value = Login />
+				</div>
 
-			{% if error %}
-				<p class="error"><strong>Error:</strong> {{error}}</p>
-			{% endif %}
+				{% if error %}
+					<p class="error"><strong>Error:</strong> {{error}}</p>
+				{% endif %}
 
-		</form>
+			</form>
 		
 
 		</div>
