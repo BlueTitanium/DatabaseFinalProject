@@ -268,33 +268,70 @@ def createFlight():
 	# return redirect
 	return redirect(url_for('.createFlightPage'))
 
-#XXX need to discuss how to get flight info
-#TODO define route to page
-#Define route for Change Flight Status use case (Airline Staff 3)
-@airlinestaff_bp.route('/changeFlightReq', methods=['GET', 'POST'])
-def changeFlightReq(airline_name, flight_num, departure_timestamp):
+
+
+#Define route for Change Flight Status Page (Airline Staff 3)
+@airlinestaff_bp.route('/changeFlightStatusPage')
+def changeFlightStatusPage():
+	message = request.args.get('message', None)
+	print(message)
+	return render_template("airlinestaff/changeFlightStatus.html", message = message)
+
+#Define route for Change Flight Status Requests use case (Airline Staff 3)
+@airlinestaff_bp.route('/changeFlightStatus', methods=['GET', 'POST'])
+def changeFlightStatus():
 	username = session['user']
-	error = None
 	
 	#check authorization
-	query = "SELECT *"\
+	query = "SELECT airline_name"\
 			" FROM AirlineStaff"\
 			" WHERE username = %s"
 	data = fetchone(query, (username))
 		
 	if not data:
-		error = "Not authorized to create a flight"
-		return render_template("airlinestaff/change_flight.html", error = error)
+		error = "ERROR: Not authorized to change a flight status"
+		return redirect(url_for('.changeFlightStatusPage', message = error))
+
 
 	#grabs information from the form
+	airline_name = data['airline_name']
+	flight_num = request.form['flight_num']
+	departure_timestamp = request.form['departure_timestamp']
 	status = request.form['status']
 
+	# convert timestamps into uniform SQL format
+	departure_timestamp = datetime.strptime(departure_timestamp, "%Y-%m-%dT%H:%M").strftime("%Y-%m-%d %H:%M:%S")
+
+
+	# check flight exists
+	query = "SELECT *"\
+			" FROM Flight"\
+			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
+	data = fetchone(query, (airline_name, flight_num, departure_timestamp))
+	if not data:
+		error = "ERROR: Flight does not exist"
+		return redirect(url_for('.changeFlightStatusPage', message = error))
+
+	# check flight has not departed
+	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") <= datetime.now()):
+		error = "ERROR: Flight as already departed"
+		return redirect(url_for('.changeFlightStatusPage', message = error))
+
+	# check flight is not canceled
+	if (data['status'] == 'canceled'):
+		error = "ERROR: Cannot change status of a canceled flight"
+		return redirect(url_for('.changeFlightStatusPage', message = error))
+
+
+	# update status
 	query = "UPDATE Flight"\
 			" SET status = %s"\
 			" WHERE airline_name = %s AND flight_num = %s AND departure_timestamp = %s"
-	modify(query, (airline_name, flight_num, departure_timestamp))
+	modify(query, (status, airline_name, flight_num, departure_timestamp))
 
-	#TODO return or redirect
+	#return redirect
+	return redirect(url_for('.changeFlightStatusPage', message = "Flight status successfully changed"))
+
 
 #Define route for Add Airplane use case (Airline Staff 4) 
 #TODO

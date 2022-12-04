@@ -24,45 +24,38 @@
 
     <!-- staff member changes the status of the flight -->
     <div class="d-flex m-3 flex-column">
-		<h3 class=>Search flight</h3>
-		<form action="./viewFlights" method="POST">
+		<h3>Change flight status</h3>
+		<form action="./changeFlightStatus" method="POST">
 			<div class="form-floating mt-2 ">
-				<input type="text" name="departure_info" class="form-control" id="sourceSearchBar"
-					placeholder="Flight name">
-				<label for="sourceSearchBar">Source City / Airport Name</label>
-			</div>
-			<div class="form-floating mt-2">
-				<input type="text" name="destination_info" class="form-control" id="destSearchBar"
-					placeholder="Flight name">
-				<label for="destSearchBar">Destination City / Airport Name</label>
+				<input type="text" name="flight_num" class="form-control" id="flight_num"
+					placeholder="Flight Number" required>
+				<label for="flight_num">Flight Number</label>
 			</div>
 			<div class="mt-2">
-				<p> Departure Date: <input type="date" name="departure_date" /> </p>
+				<p> Departure Timestamp: <input type="datetime-local" name="departure_timestamp" required/> </p>
 			</div>
-			<div class="mt-2">
-				<p> Return Date: <input type="date" name="return_date" /> <small>Leave return date empty for one-way
-						trips</small> </p>
+            <div class="form-floating mt-2 ">
+                <p>Status:</p>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="status" id="ontime" value="on-time" checked>
+                    <label class="form-check-label" for="ontime">
+                        On-Time
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="status" id="delayed" value="delayed">
+                    <label class="form-check-label" for="delayed">
+                        Delayed
+                    </label>
+                </div>
 			</div>
-			<button type="searchFunction" class="btn btn-primary mt-2">Search</button>
+			<button type="submit" class="btn btn-primary mt-2">Change Flight Status</button>
 		</form>
 	</div>
 
-    <!-- once flight is found, then change the status between delayed and on time -->
-
-    <div class="d-flex m-3 flex-column">
-		<h3 class=>Change Status</h3>
-        <form action="./changeFlightStatus" method="POST">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Status
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#">On time</a>
-                  <a class="dropdown-item" href="#">Delayed</a>
-                </div>
-              </div>
-        </form>
-    </div>
+    {% if message %}
+		<p>{{message}}</p>
+	{% endif %}
 
     <!-- bootstrap scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"

@@ -105,6 +105,7 @@ CREATE TABLE Ticket (
 	FOREIGN KEY (customer_email) REFERENCES Customer(email)
 		ON DELETE CASCADE,
 	FOREIGN KEY (airline_name, flight_num, departure_timestamp) REFERENCES Flight(airline_name, flight_num, departure_timestamp)
+		ON UPDATE CASCADE
 );
 
 CREATE TABLE Rate (
