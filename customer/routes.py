@@ -324,7 +324,7 @@ def trackSpending():
 
 	# render template
 	return render_template("customer/spending.html", 
-		total_spending_header = "in the last year", total_spending_data = total_spending_data, 
+		total_spending_header = "in the last year", total_spending_data = total_spending_data['total_spending'], 
 		chart_data_header = "In the Last 6 Months (Default)", chart_data = chart_data)
 
 #Define route for Track Spending Requests (given date range)
@@ -362,7 +362,7 @@ def trackSpendingReq():
 
 	# render template
 	return render_template("customer/spending.html", 
-		total_spending_header = total_spending_header, total_spending_data = total_spending_data, 
+		total_spending_header = total_spending_header, total_spending_data = total_spending_data['total_spending'], 
 		chart_data_header = chart_data_header, chart_data = chart_data)
 
 
