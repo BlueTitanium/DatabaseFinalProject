@@ -468,14 +468,9 @@ def viewFlightRating():
 
 
 
-#Define route for View Frequent Customers
-#TODO
+#Define route for View Frequent Customers (Airline Staff 7)
 @airlinestaff_bp.route('/viewFreqCustomers')
 def viewFreqCustomer():
-	# check if logged in
-	if not (session['user']):
-		return render_template("airlinestaff/.html", error = "Not logged in") #TODO change name
-
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
@@ -484,7 +479,7 @@ def viewFreqCustomer():
 	query = "WITH customer_ticket_count(email, ticket_count) AS ("\
 				" SELECT customer_email, COUNT(ticket_id)"\
 				" FROM Ticket"\
-				" WHERE airline_name = %s"\
+				" WHERE airline_name = %s AND DATE(purchase_timestamp) >= DATE((CURRENT_TIMESTAMP() - INTERVAL 1 YEAR))"\
 				" GROUP BY customer_email"\
 			")"\
 			" SELECT email"\
@@ -493,44 +488,30 @@ def viewFreqCustomer():
 				" SELECT MAX(ticket_count)"\
 				" FROM customer_ticket_count"\
 			")"
-	most_freq_customer = fetchone(query, (airline_name))
+	most_freq_customer = fetchone(query, (airline_name['airline_name']))
 
-	#TODO also list all customers that has taken a flight at staff's airline or provide a form that allows staff to enter a customer email
-	# if using the former option, need query as written below
-	query = "SELECT DISTINCT customer_email"\
-			" FROM Ticket"\
-			" WHERE airline_name = %s"
+	#return
+	return render_template("airlinestaff/viewFrequentCustomers.html", most_freq_customer = most_freq_customer['email'])
 
-	#TODO return
-
-#Define route for View Particular Customer (part 2 of view frequent customer use case)
-@airlinestaff_bp.route('/viewCustomerReq', methods = ['GET', 'POST'])
-def viewCustomerReq(customer_email):
-	# XXX if list all customer in previous route, then put customer_email as parameter in this route instead of using request.form.
-		# else, dont use customer_email as parameter
+#Define route for View Particular Customer (part 2 of view frequent customer use case - Airline Staff 7)
+@airlinestaff_bp.route('/viewCustomerFlights', methods = ['GET', 'POST'])
+def viewCustomerFlights():
 	# Get customer email
-	# customer_email = request.form['email']
+	customer_email = request.form['email']
 
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
 
-	# See a list of all flights a particular Customer has taken only on that particular airline
-	#XXX: maybe allow staff to enter or select a customer (in this case, would need a new route)
-	query = "SELECT *"\
-			" FROM Flight"\
-			" WHERE airline_name = %s AND (airline_name, flight_num, departure_timestamp) IN ("\
-				"SELECT airline_name, flight_num, departure_timestamp"\
-				" FROM Ticket"\
-				" WHERE customer_email = %s"\
-			")"
-	# if we want to display ticket information along with the information in the flight table, have to use new query (see below)
-	query = "SELECT *"\
+	# see a list of all flights a particular Customer has taken only on that particular airline
+	query = "SELECT Flight.*, ticket_id, sold_price"\
 			" FROM Flight NATURAL JOIN Ticket"\
-			" WHERE airline_name = %s AND customer_email = %s"
+			" WHERE airline_name = %s AND customer_email = %s AND departure_timestamp < CURRENT_TIMESTAMP()"
+	data = fetchall(query, (airline_name['airline_name'], customer_email))
 
-	#TODO return
-	pass
+	#return render template
+	return render_template("airlinestaff/viewCustomerFlights.html", 
+		airline = airline_name['airline_name'], customer_email = customer_email, flights = data)
 
 
 #Define route for total amounts of ticket sold
