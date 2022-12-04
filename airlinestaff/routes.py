@@ -143,7 +143,7 @@ def viewFlightsSearch():
 	#render template
 	return render_template("airlinestaff/viewFlights.html", airline = staff_airline_name['airline_name'], header = header, flights = data)
 
-#Define route to view all customers for a particular flight
+#Define route to view all customers for a particular flight (Airline Staff 1)
 @airlinestaff_bp.route('/viewFlightCustomers', methods=['GET', 'POST'])
 def viewFlightCustomers():
 	# get arguments
@@ -515,7 +515,7 @@ def viewCustomerFlights():
 
 
 
-#Define route for total amounts of ticket sold
+#Define route for total amounts of ticket sold (Airline Staff 8)
 @airlinestaff_bp.route('/viewReportLastYear')
 def viewReportLastYear():
 	#grabs airline_name information from session and query data
@@ -602,7 +602,7 @@ def viewReportReq():
 
 
 
-#Define route for view revenue
+#Define route for view revenue (Airline Staff 9)
 @airlinestaff_bp.route('/viewRevenue')
 def viewRevenue():
 	#grabs airline_name information from session and query data
