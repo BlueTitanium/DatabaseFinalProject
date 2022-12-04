@@ -99,7 +99,7 @@ def viewFlightsSearch():
 			" FROM Flight AS F, Airport AS D, Airport AS A"\
 			" WHERE F.departure_airport = D.name AND F.arrival_airport = A.name"\
 			" AND airline_name = %s"
-	parameters = ((staff_airline_name['airline_name']),)
+	parameters = (staff_airline_name['airline_name'],)
 
 
 	# start date + end date (departure)
