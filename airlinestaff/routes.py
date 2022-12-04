@@ -388,26 +388,24 @@ def addAirplaneConfirmation():
 
 
 
-#Define route for Add Airport
-@airlinestaff_bp.route('/addAirport')
-def addAirport():
-	return render_template('airlinestaff/add_airport.html')
+#Define route for Add Airport Page (Airline Staff 5)
+@airlinestaff_bp.route('/addAirportPage')
+def addAirportPage():
+	message = request.args.get('message', None)
+	return render_template('airlinestaff/addNewAirport.html', message = message)
 
-#TODO
-@airlinestaff_bp.route('/addAirportReq', methods=['GET', 'POST'])
-def addAirportReq():
-	username = session['user']
-	error = None
-	
+#Define route for Add Airport use case (Airline Staff 5)
+@airlinestaff_bp.route('/addAirport', methods=['GET', 'POST'])
+def addAirport():
 	#check authorization
 	query = "SELECT *"\
 			" FROM AirlineStaff"\
 			" WHERE username = %s"
-	data = fetchone(query, (username))
+	data = fetchone(query, (session['user']))
 		
 	if not data:
-		error = "Not authorized to create a flight"
-		return render_template("airlinestaff/add_airport.html", error = error)
+		error = "ERROR: Not authorized to create a flight"
+		return redirect(url_for('.addAirportPage', message = error))
 
 	#grabs information from the form
 	name = request.form['name']
@@ -415,11 +413,19 @@ def addAirportReq():
 	country = request.form['country']
 	airport_type = request.form['airport_type']
 
+	# check airport is unique
+	query = "SELECT * FROM Airport WHERE name = %s"
+	if (fetchone(query, (name))):
+		error = "ERROR: Airport already exists"
+		return redirect(url_for('.addAirportPage', message = error))
+
+	# execute query
 	query = "INSERT INTO Airport VALUES (%s, %s, %s, %s)"
 	modify(query, (name, city, country, airport_type))
 
-	#TODO return
-	pass
+	#return redirect
+	return redirect(url_for('.addAirportPage', message = "Airport added successfully"))
+
 
 
 #Define route for View Flight Ratings
