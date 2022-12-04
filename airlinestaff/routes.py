@@ -514,17 +514,10 @@ def viewCustomerFlights():
 		airline = airline_name['airline_name'], customer_email = customer_email, flights = data)
 
 
-#Define route for total amounts of ticket sold
-@airlinestaff_bp.route('/viewReports')
-def viewReports():
-	return render_template("airlinestaff/view_reports.html")
 
+#Define route for total amounts of ticket sold
 @airlinestaff_bp.route('/viewReportLastYear')
 def viewReportLastYear():
-	# check if logged in
-	if not (session['user']):
-		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
-
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
@@ -532,25 +525,22 @@ def viewReportLastYear():
 	#query for total tickets sold in last year
 	query = "SELECT COUNT(ticket_id) AS total_tickets"\
 			" FROM Ticket"\
-			" WHERE airline_name = %s AND purchase_timestamp >= DATEADD(year, -1, CURRENT_TIMESTAMP())"
-	total_tickets = fetchone(query, (airline_name))
-	#NOTE if last year does not mean last 365 days, solely Last Year, have to compare YEAR(purchase_timestamp) >= YEAR(DATEADD(year, -1, CURRENT_TIMESTAMP()))
+			" WHERE airline_name = %s AND DATE(purchase_timestamp) >= DATE((CURRENT_TIMESTAMP() - INTERVAL 1 YEAR))"
+	total_tickets = fetchone(query, (airline_name['airline_name']))
 
 	#query for total tickets sold in each month in the last year
-	query = "SELECT MONTH(purchase_timestamp) AS month, COUNT(ticket_id) AS total_tickets"\
+	query = "SELECT YEAR(purchase_timestamp) AS year, MONTH(purchase_timestamp) AS month, COUNT(ticket_id) AS total_tickets"\
 			" FROM Ticket"\
-			" WHERE airline_name = %s AND purchase_timestamp >= DATEADD(year, -1, CURRENT_TIMESTAMP())"\
-			" GROUP BY MONTH(purchase_timestamp)"
-	chart_data = fetchall(query, (airline_name))
+			" WHERE airline_name = %s AND DATE(purchase_timestamp) >= DATE((CURRENT_TIMESTAMP() - INTERVAL 1 YEAR))"\
+			" GROUP BY year, month"
+	chart_data = fetchall(query, (airline_name['airline_name']))
 
-	return render_template("airlinestaff/view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
+	return render_template("airlinestaff/viewReports.html", 
+		total_tickets_header = "in the last year (Default)", total_tickets = total_tickets['total_tickets'], 
+		chart_data_header = "In the Last Year (Default)", chart_data = chart_data)
 
 @airlinestaff_bp.route('/viewReportLastMonth')
 def viewReportLastMonth():
-	# check if logged in
-	if not (session['user']):
-		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
-
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
@@ -558,24 +548,22 @@ def viewReportLastMonth():
 	#query for total tickets sold in last month
 	query = "SELECT COUNT(ticket_id) AS total_tickets"\
 			" FROM Ticket"\
-			" WHERE airline_name = %s AND purchase_timestamp >= DATEADD(month, -1, CURRENT_TIMESTAMP())"
-	total_tickets = fetchone(query, (airline_name))
+			" WHERE airline_name = %s AND DATE(purchase_timestamp) >= DATE((CURRENT_TIMESTAMP() - INTERVAL 1 MONTH))"
+	total_tickets = fetchone(query, (airline_name['airline_name']))
 
 	#query for total tickets sold in each month in the last month
-	query = "SELECT MONTH(purchase_timestamp) AS month, COUNT(ticket_id) AS total_tickets"\
+	query = "SELECT YEAR(purchase_timestamp) AS year, MONTH(purchase_timestamp) AS month, COUNT(ticket_id) AS total_tickets"\
 			" FROM Ticket"\
-			" WHERE airline_name = %s AND purchase_timestamp >= DATEADD(month, -1, CURRENT_TIMESTAMP())"\
-			" GROUP BY MONTH(purchase_timestamp)"
-	chart_data = fetchall(query, (airline_name))
+			" WHERE airline_name = %s AND DATE(purchase_timestamp) >= DATE((CURRENT_TIMESTAMP() - INTERVAL 1 MONTH))"\
+			" GROUP BY year, month"
+	chart_data = fetchall(query, (airline_name['airline_name']))
 
-	return render_template("airlinestaff/view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
+	return render_template("airlinestaff/viewReports.html", 
+		total_tickets_header = "in the last month", total_tickets = total_tickets['total_tickets'], 
+		chart_data_header = "In the Last Month", chart_data = chart_data)
 	
 @airlinestaff_bp.route('/viewReportReq', methods=['GET', 'POST'])
 def viewReportReq():
-	# check if logged in
-	if not (session['user']):
-		return render_template("airlinestaff/view_reports.html", error = "Not logged in")
-
 	#grabs airline_name information from session and query data
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
@@ -584,22 +572,33 @@ def viewReportReq():
 	start_date = request.form['start_date']
 	end_date = request.form['end_date']
 
+	#check start date and end date is valid
+	if (datetime.strptime(start_date, "%Y-%m-%d") > datetime.strptime(end_date, "%Y-%m-%d")):
+		error = "Start date cannot be after end date"
+		return render_template("airlinestaff/viewReports.html", total_tickets = None, error = error)
+
 	#query for total tickets sold in between the time range given
 	query = "SELECT COUNT(ticket_id) AS total_tickets"\
 			" FROM Ticket"\
-			" WHERE customer_email = %s AND"\
-			" DATE(purchase_timestamp) BETWEEN %s AND %s"
-	total_tickets = fetchone(query, (airline_name, start_date, end_date))
+			" WHERE airline_name = %s AND"\
+				" DATE(purchase_timestamp) BETWEEN %s AND %s"
+	total_tickets = fetchone(query, (airline_name['airline_name'], start_date, end_date))
 
 	#query for tickets sold in each month in time range given
-	query = "SELECT MONTH(purchase_timestamp) AS month, COUNT(ticket_id) AS total_tickets"\
+	query = "SELECT YEAR(purchase_timestamp) AS year, MONTH(purchase_timestamp) AS month, COUNT(ticket_id) AS total_tickets"\
 			" FROM Ticket"\
-			" WHERE customer_email = %s AND"\
-			" DATE(purchase_timestamp) BETWEEN %s AND %s"\
-			" GROUP BY MONTH(purchase_timestamp)"
-	chart_data = fetchall(query, (airline_name, start_date, end_date))
+			" WHERE airline_name = %s AND"\
+				" DATE(purchase_timestamp) BETWEEN %s AND %s"\
+			" GROUP BY year, month"
+	chart_data = fetchall(query, (airline_name['airline_name'], start_date, end_date))
 
-	return render_template("airlinestaff/view_reports.html", total_tickets = total_tickets, chart_data = chart_data) #NOTE change name if needed
+	# set headers
+	total_tickets_header = "from " + start_date + " to " + end_date 
+	chart_data_header = "From " + start_date + " To " + end_date 
+
+	return render_template("airlinestaff/viewReports.html", 
+		total_tickets_header = total_tickets_header, total_tickets = total_tickets['total_tickets'], 
+		chart_data_header = chart_data_header, chart_data = chart_data)
 
 
 
