@@ -106,7 +106,7 @@ def purchaseTicket():
 		error = "Flight does not exist"
 
 	# check if flight has already departed
-	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") <= datetime.now()):
+	elif (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") <= datetime.now()):
 		error = "Flight has already departed"
 
 	# check if flight is cancelled
@@ -157,7 +157,7 @@ def purchaseTicketReq():
 		error = "Flight does not exist"
 
 	# check if flight has already departed
-	if (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") <= datetime.now()):
+	elif (datetime.strptime(departure_timestamp, "%Y-%m-%d %H:%M:%S") <= datetime.now()):
 		error = "Flight has already departed"
 
 	# check if flight is cancelled

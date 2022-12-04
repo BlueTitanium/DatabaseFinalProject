@@ -333,35 +333,59 @@ def changeFlightStatus():
 	return redirect(url_for('.changeFlightStatusPage', message = "Flight status successfully changed"))
 
 
-#Define route for Add Airplane use case (Airline Staff 4) 
-#TODO
+
+#Define route for Add Airplane Page (Airline Staff 4) 
+@airlinestaff_bp.route('/addAirplanePage')
+def addAirplanePage():
+	error = request.args.get('error', None)
+
+	return render_template("airlinestaff/addAirplane.html", error = error)
+
+#Define route for Add Airplane Page use case (Airline Staff 4) 
 @airlinestaff_bp.route('/addAirplane', methods=['GET', 'POST'])
 def addAirplane():
-	username = session['user']
-	error = None
-	
-	#check authorization
-	query = "SELECT *"\
-			" FROM AirlineStaff"\
-			" WHERE username = %s"
-	data = fetchone(query, (username))
-		
-	if not data:
-		error = "Not authorized to create a flight"
-		return render_template("airlinestaff/change_flight.html", error = error)
+	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
+	airline_name = fetchone(query, (session['user']))
 
-	id = request.form['id']
+	#check authorization
+	if not airline_name:
+		error = "Not authorized to add an airplane"
+		return redirect(url_for('.addAirplanePage', error = error))
+
+	#grabs information from the form
+	id = request.form['airplane_id']
 	num_seats = request.form['num_seats']
 	manufacturer = request.form['manufacturer']
 	age = request.form['age']
 
+	# check if airplane already exists
+	query = "SELECT * FROM Airplane WHERE name = %s AND id = %s"
+	if (fetchone(query, (airline_name['airline_name'], id))):
+		error = "This airplane already exists"
+		return redirect(url_for('.addAirplanePage', error = error))
+
+	query = "INSERT INTO Airplane VALUES (%s, %s, %s, %s, %s)"
+	modify(query, (id, airline_name['airline_name'], num_seats, manufacturer, age))
+	
+	# go to confirmation page (show all airplanes owned by staff company)
+	return redirect(url_for('.addAirplaneConfirmation'))
+
+#Define route for Add Airplane Confirmation Page use case (Airline Staff 4)
+@airlinestaff_bp.route('/addAirplaneConfirmation')
+def addAirplaneConfirmation():
 	query = "SELECT airline_name FROM AirlineStaff WHERE username = %s"
 	airline_name = fetchone(query, (session['user']))
 
-	query = "INSERT INTO Airplane VALUES (%s, %s, %d, %s, %d)"
-	modify(query, (id, airline_name, num_seats, manufactuerer, age))
-	#TODO return
-	pass
+	#check authorization
+	if not airline_name:
+		error = "Not logged in"
+		return render_template("addAirplaneConfirmation.html", error = error)
+
+	query = "SELECT * FROM Airplane WHERE name = %s"
+	airplanes = fetchall(query, (airline_name['airline_name']))
+
+	return render_template("airlinestaff/addAirplaneConfirmation.html", airline = airline_name['airline_name'], airplanes = airplanes)
+
 
 
 #Define route for Add Airport
