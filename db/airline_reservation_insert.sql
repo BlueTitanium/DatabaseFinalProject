@@ -21,7 +21,7 @@ INSERT INTO Airplane(name, id, num_seats, manufacturer, age) VALUE ('Jet Blue', 
 INSERT INTO AirlineStaff(username, password, firstname, lastname, date_of_birth, airline_name) VALUE ('XxAirlineWorkerxX', 'bestPassword!223', 'Robert', 'Robertson', '1994-04-28', 'Jet Blue');
 
 -- f. Insert several flights with on-time, and delayed statuses. 
-INSERT INTO Flight(airline_name, flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id) VALUE ('Jet Blue', 'B60001', '2004-09-20 23:34:22', '2004-09-21 23:34:22', 323.45, 'delayed', 'JFK', 'PVG', '1234');
+INSERT INTO Flight(airline_name, flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id) VALUE ('Jet Blue', 'B60001', '2004-09-20 23:34:00', '2004-09-21 23:34:00', 323.45, 'delayed', 'JFK', 'PVG', '1234');
 INSERT INTO Flight(airline_name, flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id) VALUE ('Jet Blue', 'B60002', '2022-12-21 13:30:00', '2022-12-22 12:30:00', 323.45, 'on-time', 'JFK', 'PVG', '5678');
 INSERT INTO Flight(airline_name, flight_num, departure_timestamp, arrival_timestamp, base_price, status, departure_airport, arrival_airport, airplane_id) VALUE ('Jet Blue', 'B60003', '2022-12-22 13:30:00', '2022-12-23 12:30:00', 323.45, 'delayed', 'JFK', 'PVG', '9abc');
 
