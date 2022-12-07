@@ -379,7 +379,7 @@ def addAirplaneConfirmation():
 	#check authorization
 	if not airline_name:
 		error = "Not logged in"
-		return render_template("addAirplaneConfirmation.html", error = error)
+		return render_template("airlinestaff/addAirplaneConfirmation.html", error = error)
 
 	query = "SELECT * FROM Airplane WHERE name = %s"
 	airplanes = fetchall(query, (airline_name['airline_name']))
